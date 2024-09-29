@@ -1,0 +1,17 @@
+name: G++
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: g++
+      run: g++ main.cpp -lraylib -lgdi32 -lopengl32 -lwinmm -s -Os
