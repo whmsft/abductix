@@ -1,0 +1,28 @@
+# The values are these:
+# 0: blank
+# 1: player object
+# 2: wall corner (UL)
+# 3: wall corner (UR)
+# 4: wall corner (DL)
+# 5: wall corner (DR)
+# 6: wall (U)
+# 7: wall (D)
+# 8: wall (L)
+# 9: wall (R)
+1:
+	playerX: 0
+	playerY: 2
+	purple:
+		boxX: 0
+		boxY: 5
+		holderX: 3
+		holderY: 5
+	tilemap:
+		- [0, 0, 0, 0]
+		- [0, 0, 0, 0]
+		- [0, 0, 0, 0]
+		- [0, 0, 0, 0]
+		- [0, 0, 0, 0]
+		- [0, 0, 0, 0]
+		- [2, 6, 6, 3]
+		- [4, 7, 7, 5]
