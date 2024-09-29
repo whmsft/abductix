@@ -52,6 +52,7 @@ void update() {
   ImageResizeNN(&imageWallLeft, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
   ImageResizeNN(&imageWallRight, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
   ImageRotate(&imageCornerTopRight,90);
+  //ImageRotateCW(&imageCornerTopRight);
   ImageRotate(&imageCornerBottomLeft,180);
   ImageRotate(&imageCornerBottomRight,270);
   ImageRotate(&imageWallDown,180);
