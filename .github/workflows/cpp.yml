@@ -14,4 +14,4 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: g++
-      run: g++ main.cpp -llib/raylib -lgdi32 -lopengl32 -lwinmm -s -Os
+      run: g++ main.cpp -Wall -lraylib -lopengl32 -lgdi32 -lwinmm -Os -s -I"./include" -L"./lib"
