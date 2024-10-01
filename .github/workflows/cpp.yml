@@ -14,22 +14,8 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Build
-      run: |
-        g++ main.cpp -Wall -lraylib -lopengl32 -lgdi32 -lwinmm -Os -s -I"./include" -L"./lib" -o abductix_win_x64.exe
-
-    - name: Upload Binaries
-      uses: actions/upload-artifact@v3
-      with:
-        name: abductix_win_x64
-        path: abductix_win_x64.exe
-
-  release:
-    needs: build
-    runs-on: windows-latest
-    steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-
+      run: g++ main.cpp -Wall -lraylib -lopengl32 -lgdi32 -lwinmm -Os -s -I"./include" -L"./lib" -o abductix_win_x64.exe
+    
     - uses: dev-drprasad/delete-tag-and-release@v0.2.1
       name: Delete latest alpha tag and release
       with:
