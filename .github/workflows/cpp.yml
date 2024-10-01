@@ -30,28 +30,20 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Delete Existing Alpha Tag
-      run: |
-        git tag -d alpha || true
-        git push origin :refs/tags/alpha || true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Create Release
-      uses: actions/create-release@v1
+    - uses: dev-drprasad/delete-tag-and-release@v0.2.1
+      name: Delete latest alpha tag and release
       with:
         tag_name: alpha
-        release_name: "Automated Build - Alpha (${{ github.sha }})"
-        draft: false
-        prerelease: true
-        body: "This is an automated build for commit [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
+    - uses: ncipollo/release-action@v1.12.0
+      name: Create new tag and release and upload artifacts
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: abductix_win_x64.exe
-        asset_name: abductix_win_x64.exe
-        asset_content_type: application/octet-stream
+        name: "Automated Build (${{ github.sha }})"
+        commit: main
+        tag: alpha
+        prerelease: true
+        artifacts: "abductix_win_x64.exe"
+        body: "This is an automated build for commit [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})"
+        token: ${{ secrets.GITHUB_TOKEN }}
