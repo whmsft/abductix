@@ -1,9 +1,0 @@
-INFO: FILEIO: [levels.json] Text file loaded successfully
-INFO: FILEIO: [assets/corner.png] File loaded successfully
-INFO: IMAGE: Data loaded successfully (16x16 | R8G8B8 | 1 mipmaps)
-INFO: FILEIO: [assets/wall.png] File loaded successfully
-INFO: IMAGE: Data loaded successfully (16x16 | R8G8B8 | 1 mipmaps)
-INFO: Initializing raylib 4.0
-WARNING: GLFW: Error: 65543 Description: WGL: OpenGL profile requested but WGL_ARB_create_context_profile is unavailable
-WARNING: GLFW: Failed to initialize Window
-FATAL: Failed to initialize Graphic Device

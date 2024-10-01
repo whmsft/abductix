@@ -1,7 +1,0 @@
-E:/Programming/_languages/msys2/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/11.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\aayush\AppData\Local\Temp\ccrApth6.o:main.cpp:(.text+0x63e): undefined reference to `ImageRotate'
-E:/Programming/_languages/msys2/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/11.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\aayush\AppData\Local\Temp\ccrApth6.o:main.cpp:(.text+0x64b): undefined reference to `ImageRotate'
-E:/Programming/_languages/msys2/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/11.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\aayush\AppData\Local\Temp\ccrApth6.o:main.cpp:(.text+0x658): undefined reference to `ImageRotate'
-E:/Programming/_languages/msys2/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/11.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\aayush\AppData\Local\Temp\ccrApth6.o:main.cpp:(.text+0x66c): undefined reference to `ImageRotate'
-E:/Programming/_languages/msys2/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/11.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\aayush\AppData\Local\Temp\ccrApth6.o:main.cpp:(.text+0x680): undefined reference to `ImageRotate'
-E:/Programming/_languages/msys2/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/11.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\aayush\AppData\Local\Temp\ccrApth6.o:main.cpp:(.text+0x699): more undefined references to `ImageRotate' follow
-collect2.exe: error: ld returned 1 exit status

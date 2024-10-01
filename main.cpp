@@ -15,9 +15,17 @@ nlohmann::json levelMap = nlohmann::json::parse(levelMapFile);
 int level = 1;
 int screenWidth, screenHeight, offsetX, offsetY, playerX, playerY;
 int levelWidth, levelHeight;
+int frame = 0;
 
-Image imageCornerTopLeft, imageCornerTopRight, imageCornerBottomLeft, imageCornerBottomRight = LoadImage("assets/corner.png");
-Image imageWallUp, imageWallDown, imageWallLeft, imageWallRight = LoadImage("assets/wall.png");
+Image imageCornerTopLeft = LoadImage("assets/corner.png");
+Image imageCornerTopRight = LoadImage("assets/corner.png");
+Image imageCornerBottomLeft = LoadImage("assets/corner.png");
+Image imageCornerBottomRight = LoadImage("assets/corner.png");
+Image imageWallUp = LoadImage("assets/wall.png");
+Image imageWallDown = LoadImage("assets/wall.png");
+Image imageWallLeft = LoadImage("assets/wall.png");
+Image imageWallRight = LoadImage("assets/wall.png");
+Texture2D textureCornerTopLeft, textureCornerTopRight, textureCornerBottomLeft, textureCornerBottomRight, textureWallUp, textureWallDown, textureWallLeft, textureWallRight;
 
 int main(void) {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -43,32 +51,34 @@ void update() {
   playerX = levelMap[to_string(level)]["playerX"];
   offsetX = screenWidth/(2*levelWidth+2);
   offsetY = (screenHeight/2)-((levelHeight*(screenWidth/(levelWidth+1)))/2);
-  ImageResizeNN(&imageCornerTopLeft, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
-  ImageResizeNN(&imageCornerTopRight, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
-  ImageResizeNN(&imageCornerBottomLeft, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
-  ImageResizeNN(&imageCornerBottomRight, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
-  ImageResizeNN(&imageWallUp, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
-  ImageResizeNN(&imageWallDown, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
-  ImageResizeNN(&imageWallLeft, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
-  ImageResizeNN(&imageWallRight, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
-  ImageRotate(&imageCornerTopRight,90);
-  //ImageRotateCW(&imageCornerTopRight);
-  ImageRotate(&imageCornerBottomLeft,180);
-  ImageRotate(&imageCornerBottomRight,270);
-  ImageRotate(&imageWallDown,180);
-  ImageRotate(&imageWallLeft,270);
-  ImageRotate(&imageWallRight,90);
+  if (IsWindowResized() or frame==0) {
+    ImageResizeNN(&imageCornerTopLeft, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
+    ImageResizeNN(&imageCornerTopRight, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
+    ImageResizeNN(&imageCornerBottomLeft, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
+    ImageResizeNN(&imageCornerBottomRight, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
+    ImageResizeNN(&imageWallUp, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
+    ImageResizeNN(&imageWallDown, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
+    ImageResizeNN(&imageWallLeft, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
+    ImageResizeNN(&imageWallRight, screenWidth/(levelWidth+1), screenWidth/(levelWidth+1));
+    ImageRotate(&imageCornerTopRight,90);
+    ImageRotate(&imageCornerBottomLeft,270);
+    ImageRotate(&imageCornerBottomRight,180);
+    ImageRotate(&imageWallDown,180);
+    ImageRotate(&imageWallLeft,270);
+    ImageRotate(&imageWallRight,90);
+    textureCornerTopLeft = LoadTextureFromImage(imageCornerTopLeft);
+    textureCornerTopRight = LoadTextureFromImage(imageCornerTopRight);
+    textureCornerBottomLeft = LoadTextureFromImage(imageCornerBottomLeft);
+    textureCornerBottomRight = LoadTextureFromImage(imageCornerBottomRight);
+    textureWallUp = LoadTextureFromImage(imageWallUp);
+    textureWallDown = LoadTextureFromImage(imageWallDown);
+    textureWallLeft = LoadTextureFromImage(imageWallLeft);
+    textureWallRight = LoadTextureFromImage(imageWallRight);
+  }
+  frame++;
 }
 
 void draw() {
-  Texture2D textureCornerTopLeft = LoadTextureFromImage(imageCornerTopLeft);
-  Texture2D textureCornerTopRight = LoadTextureFromImage(imageCornerTopRight);
-  Texture2D textureCornerBottomLeft = LoadTextureFromImage(imageCornerBottomLeft);
-  Texture2D textureCornerBottomRight = LoadTextureFromImage(imageCornerBottomRight);
-  Texture2D textureWallUp = LoadTextureFromImage(imageWallUp);
-  Texture2D textureWallDown = LoadTextureFromImage(imageWallDown);
-  Texture2D textureWallLeft = LoadTextureFromImage(imageWallLeft);
-  Texture2D textureWallRight = LoadTextureFromImage(imageWallRight);
   ClearBackground(ColorFromHSV(302,.54,.52));
   for (size_t rowIndex = 0; rowIndex < levelMap[to_string(level)]["tilemap"].size(); ++rowIndex) {
     const auto& row = levelMap[to_string(level)]["tilemap"][rowIndex];
@@ -85,5 +95,3 @@ void draw() {
     }
   }
 }
-//272,80,48
-//302,54,52
