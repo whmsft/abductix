@@ -16,9 +16,10 @@ int level = 1;
 int screenWidth, screenHeight, offsetX, offsetY, tileSize;
 int levelWidth, levelHeight;
 int frame = 0;
+int playerX, playerY;
 
-Image imageCornerTopLeft, imageCornerTopRight, imageCornerBottomLeft, imageCornerBottomRight, imageWallUp, imageWallDown, imageWallLeft, imageWallRight;
-Texture2D textureCornerTopLeft, textureCornerTopRight, textureCornerBottomLeft, textureCornerBottomRight, textureWallUp, textureWallDown, textureWallLeft, textureWallRight;
+Image imageCornerTopLeft, imageCornerTopRight, imageCornerBottomLeft, imageCornerBottomRight, imageWallUp, imageWallDown, imageWallLeft, imageWallRight, imagePlayer, imagePurpleBox, imagePurplePlaceholder;
+Texture2D textureCornerTopLeft, textureCornerTopRight, textureCornerBottomLeft, textureCornerBottomRight, textureWallUp, textureWallDown, textureWallLeft, textureWallRight, texturePlayer, texturePurpleBox, texturePurplePlaceholder;
 
 void LoadTextures() {
     imageCornerTopLeft = LoadImage("assets/corner.png");
@@ -29,8 +30,10 @@ void LoadTextures() {
     imageWallDown = LoadImage("assets/wall.png");
     imageWallLeft = LoadImage("assets/wall.png");
     imageWallRight = LoadImage("assets/wall.png");
+    imagePlayer = LoadImage("assets/player.png");
+    imagePurpleBox = LoadImage("assets/purple.box.png");
+    imagePurplePlaceholder = LoadImage("assets/purple.placeholder.png");
 
-    // Set initial textures (they will be resized dynamically)
     textureCornerTopLeft = LoadTextureFromImage(imageCornerTopLeft);
     textureCornerTopRight = LoadTextureFromImage(imageCornerTopRight);
     textureCornerBottomLeft = LoadTextureFromImage(imageCornerBottomLeft);
@@ -39,10 +42,12 @@ void LoadTextures() {
     textureWallDown = LoadTextureFromImage(imageWallDown);
     textureWallLeft = LoadTextureFromImage(imageWallLeft);
     textureWallRight = LoadTextureFromImage(imageWallRight);
+    texturePlayer = LoadTextureFromImage(imagePlayer);
+    texturePurpleBox = LoadTextureFromImage(imagePurpleBox);
+    texturePurplePlaceholder = LoadTextureFromImage(imagePurplePlaceholder);
 }
 
 void ResizeAndRotateTextures(int newTileSize) {
-    // Resize images to the new tile size
     ImageResizeNN(&imageCornerTopLeft, newTileSize, newTileSize);
     ImageResizeNN(&imageCornerTopRight, newTileSize, newTileSize);
     ImageResizeNN(&imageCornerBottomLeft, newTileSize, newTileSize);
@@ -51,20 +56,21 @@ void ResizeAndRotateTextures(int newTileSize) {
     ImageResizeNN(&imageWallDown, newTileSize, newTileSize);
     ImageResizeNN(&imageWallLeft, newTileSize, newTileSize);
     ImageResizeNN(&imageWallRight, newTileSize, newTileSize);
+    ImageResizeNN(&imagePlayer, newTileSize, newTileSize);
+    ImageResizeNN(&imagePurpleBox, newTileSize, newTileSize);
+    ImageResizeNN(&imagePurplePlaceholder, newTileSize, newTileSize);
 
-    // Rotate images for corners and walls based on desired orientation
-    ImageRotateCW(&imageCornerTopRight);      // Rotate top-right 90 degrees clockwise
-    ImageRotateCCW(&imageCornerBottomLeft);    // Rotate bottom-left 90 degrees counterclockwise
-    ImageRotateCW(&imageCornerBottomRight);   // Rotate bottom-right 180 degrees
-    ImageRotateCW(&imageCornerBottomRight);   // Rotate bottom-right 180 degrees
+    ImageRotateCW(&imageCornerTopRight);
+    ImageRotateCCW(&imageCornerBottomLeft);
+    ImageRotateCW(&imageCornerBottomRight);
+    ImageRotateCW(&imageCornerBottomRight);
 
-    ImageRotateCW(&imageWallDown);            // Rotate wall down 180 degrees
-    ImageRotateCW(&imageWallDown);            // Rotate wall down 180 degrees
-    ImageRotateCCW(&imageWallLeft);            // Rotate wall left 90 degrees counterclockwise
-    ImageRotateCW(&imageWallRight);           // Rotate wall right 90 degrees clockwise
+    ImageRotateCW(&imageWallDown);
+    ImageRotateCW(&imageWallDown);
+    ImageRotateCCW(&imageWallLeft);
+    ImageRotateCW(&imageWallRight);
 
-    // Reload textures from resized images
-    UnloadTexture(textureCornerTopLeft);  // Unload previous textures to avoid memory leaks
+    UnloadTexture(textureCornerTopLeft);
     UnloadTexture(textureCornerTopRight);
     UnloadTexture(textureCornerBottomLeft);
     UnloadTexture(textureCornerBottomRight);
@@ -72,6 +78,9 @@ void ResizeAndRotateTextures(int newTileSize) {
     UnloadTexture(textureWallDown);
     UnloadTexture(textureWallLeft);
     UnloadTexture(textureWallRight);
+    UnloadTexture(texturePlayer);
+    UnloadTexture(texturePurpleBox);
+    UnloadTexture(texturePurplePlaceholder);
 
     textureCornerTopLeft = LoadTextureFromImage(imageCornerTopLeft);
     textureCornerTopRight = LoadTextureFromImage(imageCornerTopRight);
@@ -81,6 +90,9 @@ void ResizeAndRotateTextures(int newTileSize) {
     textureWallDown = LoadTextureFromImage(imageWallDown);
     textureWallLeft = LoadTextureFromImage(imageWallLeft);
     textureWallRight = LoadTextureFromImage(imageWallRight);
+    texturePlayer = LoadTextureFromImage(imagePlayer);
+    texturePurpleBox = LoadTextureFromImage(imagePurpleBox);
+    texturePurplePlaceholder = LoadTextureFromImage(imagePurplePlaceholder);
 }
 
 void InitGame() {
@@ -89,13 +101,12 @@ void InitGame() {
     
     screenWidth = GetScreenWidth();
     screenHeight = GetScreenHeight();
-    
-    // Calculate tile size based on screen dimensions and level size
-    tileSize = screenWidth / (levelWidth + 2); // Add space on both sides for centering
-    offsetX = (screenWidth - (levelWidth * tileSize)) / 2;  // Center horizontally
-    offsetY = (screenHeight - (levelHeight * tileSize)) / 2; // Center vertically
 
-    ResizeAndRotateTextures(tileSize);  // Resizing and rotating textures based on the new tile size
+    tileSize = screenWidth / (levelWidth + 2);
+    offsetX = (screenWidth - (levelWidth * tileSize)) / 2;
+    offsetY = (screenHeight - (levelHeight * tileSize)) / 2;
+
+    ResizeAndRotateTextures(tileSize);
 }
 
 int main(void) {
@@ -113,11 +124,12 @@ int main(void) {
     while (!WindowShouldClose()) gameLoop();
     #endif
     
-    // Cleanup
     UnloadTexture(textureCornerTopLeft); UnloadTexture(textureCornerTopRight);
     UnloadTexture(textureCornerBottomLeft); UnloadTexture(textureCornerBottomRight);
     UnloadTexture(textureWallUp); UnloadTexture(textureWallDown);
     UnloadTexture(textureWallLeft); UnloadTexture(textureWallRight);
+    UnloadTexture(texturePlayer);
+    UnloadTexture(texturePurpleBox); UnloadTexture(texturePurplePlaceholder);
     CloseWindow();
 
     return 0;
@@ -127,14 +139,16 @@ void update() {
     if (IsWindowResized()) {
         screenWidth = GetScreenWidth();
         screenHeight = GetScreenHeight();
-        InitGame();  // Recalculate offsets and resize textures on window resize
+        InitGame();
     }
+    playerX = offsetX + levelMap[to_string(level)]["playerX"].get<int>() * tileSize;
+    playerY = offsetY + levelMap[to_string(level)]["playerY"].get<int>() * tileSize;
 }
 
 void draw() {
     ClearBackground(ColorFromHSV(302, .54, .52));
     
-    const auto& tilemap = levelMap[to_string(level)]["tilemap"];  // Cache the tilemap reference
+    const auto& tilemap = levelMap[to_string(level)]["tilemap"];
     for (size_t rowIndex = 0; rowIndex < tilemap.size(); ++rowIndex) {
         const auto& row = tilemap[rowIndex];
         for (size_t tileIndex = 0; tileIndex < row.size(); ++tileIndex) {
@@ -142,7 +156,6 @@ void draw() {
             int x = offsetX + tileIndex * tileSize;
             int y = offsetY + rowIndex * tileSize;
             
-            // Simplify drawing by using a switch statement
             switch (tile) {
                 case 1: DrawTexture(textureCornerTopLeft, x, y, WHITE); break;
                 case 2: DrawTexture(textureCornerTopRight, x, y, WHITE); break;
@@ -152,8 +165,12 @@ void draw() {
                 case 6: DrawTexture(textureWallDown, x, y, WHITE); break;
                 case 7: DrawTexture(textureWallLeft, x, y, WHITE); break;
                 case 8: DrawTexture(textureWallRight, x, y, WHITE); break;
+                case 9: DrawTexture(texturePurpleBox, x, y, WHITE); break;
+                case 10: DrawTexture(texturePurplePlaceholder, x, y, WHITE); break;
                 default: break;
             }
         }
     }
+
+    DrawTexture(texturePlayer, playerX, playerY, WHITE);
 }
