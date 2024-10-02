@@ -16,7 +16,9 @@ int level = 1;
 int screenWidth, screenHeight, offsetX, offsetY, tileSize;
 int levelWidth, levelHeight;
 int frame = 0;
-int playerX, playerY;
+int playerMapX, playerMapY, playerX, playerY;
+int purpleBoxX, purpleBoxY, purpleBoxMapX, purpleBoxMapY;
+int purplePlaceholderX, purplePlaceholderY, purplePlaceholderMapX, purplePlaceholderMapY;
 
 Image imageCornerTopLeft, imageCornerTopRight, imageCornerBottomLeft, imageCornerBottomRight, imageWallUp, imageWallDown, imageWallLeft, imageWallRight, imagePlayer, imagePurpleBox, imagePurplePlaceholder;
 Texture2D textureCornerTopLeft, textureCornerTopRight, textureCornerBottomLeft, textureCornerBottomRight, textureWallUp, textureWallDown, textureWallLeft, textureWallRight, texturePlayer, texturePurpleBox, texturePurplePlaceholder;
@@ -95,7 +97,7 @@ void ResizeAndRotateTextures(int newTileSize) {
     texturePurplePlaceholder = LoadTextureFromImage(imagePurplePlaceholder);
 }
 
-void InitGame() {
+void InitLevel() {
     levelWidth = levelMap[to_string(level)]["width"].get<int>();
     levelHeight = levelMap[to_string(level)]["height"].get<int>();
     
@@ -107,6 +109,11 @@ void InitGame() {
     offsetY = (screenHeight - (levelHeight * tileSize)) / 2;
 
     ResizeAndRotateTextures(tileSize);
+
+    playerMapX = levelMap[to_string(level)]["playerX"].get<int>();
+    playerMapY = levelMap[to_string(level)]["playerY"].get<int>();
+    playerX = offsetX + playerMapX * tileSize;
+    playerY = offsetY + playerMapY * tileSize;
 }
 
 int main(void) {
@@ -119,7 +126,7 @@ int main(void) {
     InitWindow(320, 640, "abductix");
     SetTargetFPS(30);
     LoadTextures();
-    InitGame();
+    InitLevel();
     
     while (!WindowShouldClose()) gameLoop();
     #endif
@@ -139,15 +146,16 @@ void update() {
     if (IsWindowResized()) {
         screenWidth = GetScreenWidth();
         screenHeight = GetScreenHeight();
-        InitGame();
+        InitLevel();
     }
-    playerX = offsetX + levelMap[to_string(level)]["playerX"].get<int>() * tileSize;
-    playerY = offsetY + levelMap[to_string(level)]["playerY"].get<int>() * tileSize;
+    if (IsKeyPressed(KEY_RIGHT) && playerMapX+1<levelMap[to_string(level)]["width"].get<int>()) playerMapX++;
+    if (IsKeyPressed(KEY_LEFT) && playerMapX>0) playerMapX--;
+    if (playerX < offsetX + playerMapX * tileSize) playerX += tileSize / 10;
+    if (playerX > offsetX + playerMapX * tileSize) playerX -= tileSize / 10;
 }
 
 void draw() {
     ClearBackground(ColorFromHSV(302, .54, .52));
-    
     const auto& tilemap = levelMap[to_string(level)]["tilemap"];
     for (size_t rowIndex = 0; rowIndex < tilemap.size(); ++rowIndex) {
         const auto& row = tilemap[rowIndex];
@@ -155,7 +163,7 @@ void draw() {
             const int tile = row[tileIndex].get<int>();
             int x = offsetX + tileIndex * tileSize;
             int y = offsetY + rowIndex * tileSize;
-            
+        
             switch (tile) {
                 case 1: DrawTexture(textureCornerTopLeft, x, y, WHITE); break;
                 case 2: DrawTexture(textureCornerTopRight, x, y, WHITE); break;
@@ -165,8 +173,6 @@ void draw() {
                 case 6: DrawTexture(textureWallDown, x, y, WHITE); break;
                 case 7: DrawTexture(textureWallLeft, x, y, WHITE); break;
                 case 8: DrawTexture(textureWallRight, x, y, WHITE); break;
-                case 9: DrawTexture(texturePurpleBox, x, y, WHITE); break;
-                case 10: DrawTexture(texturePurplePlaceholder, x, y, WHITE); break;
                 default: break;
             }
         }
