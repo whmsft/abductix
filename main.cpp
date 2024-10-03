@@ -19,7 +19,7 @@ int frame = 0;
 int playerMapX, playerMapY, playerX, playerY;
 int purpleBoxX, purpleBoxY, purpleBoxMapX, purpleBoxMapY;
 int purplePlaceholderX, purplePlaceholderY, purplePlaceholderMapX, purplePlaceholderMapY;
-bool isBoxFloating = false;
+bool isPurpleBoxAttached = false;
 
 Image imageCornerTopLeft, imageCornerTopRight, imageCornerBottomLeft, imageCornerBottomRight, imageWallUp, imageWallDown, imageWallLeft, imageWallRight, imagePlayer, imagePurpleBox, imagePurplePlaceholder;
 Texture2D textureCornerTopLeft, textureCornerTopRight, textureCornerBottomLeft, textureCornerBottomRight, textureWallUp, textureWallDown, textureWallLeft, textureWallRight, texturePlayer, texturePurpleBox, texturePurplePlaceholder;
@@ -102,6 +102,7 @@ int newDropMapY(int positionX, int positionY) {
     for (int index=positionY; index<levelMap[to_string(level)]["height"].get<int>(); index++) {
         if (levelMap[to_string(level)]["tilemap"][index][positionX].get<int>()!=0) {return index-1; break;}
     }
+    return -1;
 }
 
 void InitLevel() {
@@ -165,13 +166,22 @@ void update() {
     }
     if (IsKeyPressed(KEY_RIGHT) && playerMapX+1<levelMap[to_string(level)]["width"].get<int>()) playerMapX++;
     if (IsKeyPressed(KEY_LEFT) && playerMapX>0) playerMapX--;
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && isBoxFloating) purpleBoxMapY = newDropMapY(purpleBoxMapX, purpleBoxMapY);
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !isBoxFloating && (playerMapX == purpleBoxMapX)) {purpleBoxMapY = playerMapY+1; isBoxFloating=true;}
+
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !isPurpleBoxAttached && (playerMapX == purpleBoxMapX)) {
+        purpleBoxMapY = playerMapY+1;
+    }
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && isPurpleBoxAttached) {
+        purpleBoxMapY = newDropMapY(purpleBoxMapX, purpleBoxMapY);
+    }
+    
     if (playerX < offsetX + playerMapX * tileSize) playerX += tileSize / 10;
     if (playerX > offsetX + playerMapX * tileSize) playerX -= tileSize / 10;
     if (purpleBoxY < offsetY + purpleBoxMapY * tileSize) purpleBoxY += tileSize / 10;
     if (purpleBoxY > offsetY + purpleBoxMapY * tileSize) purpleBoxY -= tileSize / 10;
-    if (isBoxFloating) purpleBoxX = playerX;
+    if (playerMapY+1==purpleBoxMapY) purpleBoxX = playerX;
+    if (purpleBoxY<=playerY+tileSize+1) {
+        isPurpleBoxAttached = true;
+    } else {isPurpleBoxAttached=false;}
 }
 
 void draw() {
@@ -199,6 +209,7 @@ void draw() {
     }
 
     DrawTexture(texturePlayer, playerX, playerY, WHITE);
-    DrawTexture(texturePurpleBox, purpleBoxX, purpleBoxY, WHITE);
+    if (isPurpleBoxAttached) DrawTexture(texturePlayer, 0,0 , WHITE);
     DrawTexture(texturePurplePlaceholder, purplePlaceholderX, purplePlaceholderY, WHITE);
+    DrawTexture(texturePurpleBox, purpleBoxX, purpleBoxY, WHITE);
 }
