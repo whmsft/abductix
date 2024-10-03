@@ -19,6 +19,7 @@ int frame = 0;
 int playerMapX, playerMapY, playerX, playerY;
 int purpleBoxX, purpleBoxY, purpleBoxMapX, purpleBoxMapY;
 int purplePlaceholderX, purplePlaceholderY, purplePlaceholderMapX, purplePlaceholderMapY;
+bool isBoxFloating = false;
 
 Image imageCornerTopLeft, imageCornerTopRight, imageCornerBottomLeft, imageCornerBottomRight, imageWallUp, imageWallDown, imageWallLeft, imageWallRight, imagePlayer, imagePurpleBox, imagePurplePlaceholder;
 Texture2D textureCornerTopLeft, textureCornerTopRight, textureCornerBottomLeft, textureCornerBottomRight, textureWallUp, textureWallDown, textureWallLeft, textureWallRight, texturePlayer, texturePurpleBox, texturePurplePlaceholder;
@@ -97,6 +98,12 @@ void ResizeAndRotateTextures(int newTileSize) {
     texturePurplePlaceholder = LoadTextureFromImage(imagePurplePlaceholder);
 }
 
+int newDropMapY(int positionX, int positionY) {
+    for (int index=positionY; index<levelMap[to_string(level)]["height"].get<int>(); index++) {
+        if (levelMap[to_string(level)]["tilemap"][index][positionX].get<int>()!=0) {return index-1; break;}
+    }
+}
+
 void InitLevel() {
     levelWidth = levelMap[to_string(level)]["width"].get<int>();
     levelHeight = levelMap[to_string(level)]["height"].get<int>();
@@ -112,8 +119,16 @@ void InitLevel() {
 
     playerMapX = levelMap[to_string(level)]["playerX"].get<int>();
     playerMapY = levelMap[to_string(level)]["playerY"].get<int>();
+    purpleBoxMapX = levelMap[to_string(level)]["purple"]["boxX"].get<int>();
+    purpleBoxMapY = levelMap[to_string(level)]["purple"]["boxY"].get<int>();
+    purplePlaceholderMapX = levelMap[to_string(level)]["purple"]["holderX"].get<int>();
+    purplePlaceholderMapY = levelMap[to_string(level)]["purple"]["holderY"].get<int>();
     playerX = offsetX + playerMapX * tileSize;
     playerY = offsetY + playerMapY * tileSize;
+    purpleBoxX = offsetX + purpleBoxMapX * tileSize;
+    purpleBoxY = offsetY + purpleBoxMapY * tileSize;
+    purplePlaceholderX = offsetX + purplePlaceholderMapX * tileSize;
+    purplePlaceholderY = offsetY + purplePlaceholderMapY * tileSize;
 }
 
 int main(void) {
@@ -150,8 +165,13 @@ void update() {
     }
     if (IsKeyPressed(KEY_RIGHT) && playerMapX+1<levelMap[to_string(level)]["width"].get<int>()) playerMapX++;
     if (IsKeyPressed(KEY_LEFT) && playerMapX>0) playerMapX--;
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && isBoxFloating) purpleBoxMapY = newDropMapY(purpleBoxMapX, purpleBoxMapY);
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !isBoxFloating && (playerMapX == purpleBoxMapX)) {purpleBoxMapY = playerMapY+1; isBoxFloating=true;}
     if (playerX < offsetX + playerMapX * tileSize) playerX += tileSize / 10;
     if (playerX > offsetX + playerMapX * tileSize) playerX -= tileSize / 10;
+    if (purpleBoxY < offsetY + purpleBoxMapY * tileSize) purpleBoxY += tileSize / 10;
+    if (purpleBoxY > offsetY + purpleBoxMapY * tileSize) purpleBoxY -= tileSize / 10;
+    if (isBoxFloating) purpleBoxX = playerX;
 }
 
 void draw() {
@@ -179,4 +199,6 @@ void draw() {
     }
 
     DrawTexture(texturePlayer, playerX, playerY, WHITE);
+    DrawTexture(texturePurpleBox, purpleBoxX, purpleBoxY, WHITE);
+    DrawTexture(texturePurplePlaceholder, purplePlaceholderX, purplePlaceholderY, WHITE);
 }
