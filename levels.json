@@ -5,10 +5,8 @@
     "playerX": 0,
     "playerY": 2,
     "purple": {
-      "boxX": 0,
-      "boxY": 5,
-      "holderX": 3,
-      "holderY": 5
+      "box": [[0,5]],
+      "holder": [[3,5]]
     },
     "tilemap": [
       [0, 0, 0, 0],

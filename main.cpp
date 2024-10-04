@@ -10,8 +10,9 @@ using namespace std;
 void update(), draw();
 void gameLoop() { update(); BeginDrawing(); draw(); EndDrawing(); }
 
-char* levelMapFile = LoadFileText("levels.json");
-nlohmann::json levelMap = nlohmann::json::parse(levelMapFile);
+char* allLevelMapFile = LoadFileText("levels.json");
+nlohmann::json allLevelMap = nlohmann::json::parse(allLevelMapFile);
+std::vector<std::vector<int>> tileMap;
 int level = 1;
 int screenWidth, screenHeight, offsetX, offsetY, tileSize;
 int levelWidth, levelHeight;
@@ -20,6 +21,7 @@ int playerMapX, playerMapY, playerX, playerY;
 int purpleBoxX, purpleBoxY, purpleBoxMapX, purpleBoxMapY;
 int purplePlaceholderX, purplePlaceholderY, purplePlaceholderMapX, purplePlaceholderMapY;
 bool isPurpleBoxAttached = false;
+bool inputAllowed=true;
 
 Image imageCornerTopLeft, imageCornerTopRight, imageCornerBottomLeft, imageCornerBottomRight, imageWallUp, imageWallDown, imageWallLeft, imageWallRight, imagePlayer, imagePurpleBox, imagePurplePlaceholder;
 Texture2D textureCornerTopLeft, textureCornerTopRight, textureCornerBottomLeft, textureCornerBottomRight, textureWallUp, textureWallDown, textureWallLeft, textureWallRight, texturePlayer, texturePurpleBox, texturePurplePlaceholder;
@@ -99,16 +101,24 @@ void ResizeAndRotateTextures(int newTileSize) {
 }
 
 int newDropMapY(int positionX, int positionY) {
-    for (int index=positionY; index<levelMap[to_string(level)]["height"].get<int>(); index++) {
-        if (levelMap[to_string(level)]["tilemap"][index][positionX].get<int>()!=0) {return index-1; break;}
+    for (int index=positionY; index<levelHeight; index++) {
+        if (tileMap[index][positionX]!=0) {return index-1; break;}
     }
     return -1;
 }
 
 void InitLevel() {
-    levelWidth = levelMap[to_string(level)]["width"].get<int>();
-    levelHeight = levelMap[to_string(level)]["height"].get<int>();
+    levelWidth = allLevelMap[to_string(level)]["width"].get<int>();
+    levelHeight = allLevelMap[to_string(level)]["height"].get<int>();
     
+    tileMap.resize(levelHeight);
+    for (int i = 0; i < levelHeight; ++i) {
+        tileMap[i].resize(levelWidth);
+        for (int j = 0; j < levelWidth; ++j) {
+            tileMap[i][j] = allLevelMap[to_string(level)]["tilemap"][i][j].get<int>();
+        }
+    }
+
     screenWidth = GetScreenWidth();
     screenHeight = GetScreenHeight();
 
@@ -118,12 +128,16 @@ void InitLevel() {
 
     ResizeAndRotateTextures(tileSize);
 
-    playerMapX = levelMap[to_string(level)]["playerX"].get<int>();
-    playerMapY = levelMap[to_string(level)]["playerY"].get<int>();
-    purpleBoxMapX = levelMap[to_string(level)]["purple"]["boxX"].get<int>();
-    purpleBoxMapY = levelMap[to_string(level)]["purple"]["boxY"].get<int>();
-    purplePlaceholderMapX = levelMap[to_string(level)]["purple"]["holderX"].get<int>();
-    purplePlaceholderMapY = levelMap[to_string(level)]["purple"]["holderY"].get<int>();
+    playerMapX = allLevelMap[to_string(level)]["playerX"].get<int>();
+    playerMapY = allLevelMap[to_string(level)]["playerY"].get<int>();
+    for (nlohmann::json::size_type i = 0; i < allLevelMap[to_string(level)]["purple"]["box"].size(); ++i) {
+        purpleBoxMapX = allLevelMap[to_string(level)]["purple"]["box"][i][0].get<int>();
+        purpleBoxMapY = allLevelMap[to_string(level)]["purple"]["box"][i][1].get<int>();
+    }
+    for (nlohmann::json::size_type i = 0; i < allLevelMap[to_string(level)]["purple"]["holder"].size(); ++i) {
+        purplePlaceholderMapX = allLevelMap[to_string(level)]["purple"]["holder"][i][0].get<int>();
+        purplePlaceholderMapY = allLevelMap[to_string(level)]["purple"]["holder"][i][1].get<int>();
+    }
     playerX = offsetX + playerMapX * tileSize;
     playerY = offsetY + playerMapY * tileSize;
     purpleBoxX = offsetX + purpleBoxMapX * tileSize;
@@ -164,33 +178,36 @@ void update() {
         screenHeight = GetScreenHeight();
         InitLevel();
     }
-    if (IsKeyPressed(KEY_RIGHT) && playerMapX+1<levelMap[to_string(level)]["width"].get<int>()) playerMapX++;
+    if (IsKeyPressed(KEY_RIGHT) && playerMapX+1<levelWidth) playerMapX++;
     if (IsKeyPressed(KEY_LEFT) && playerMapX>0) playerMapX--;
 
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !isPurpleBoxAttached && (playerMapX == purpleBoxMapX)) {
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !isPurpleBoxAttached && (playerMapX == purpleBoxMapX) && inputAllowed) {
         purpleBoxMapY = playerMapY+1;
     }
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && isPurpleBoxAttached) {
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && isPurpleBoxAttached && inputAllowed) {
         purpleBoxMapY = newDropMapY(purpleBoxMapX, purpleBoxMapY);
     }
     
-    if (playerX < offsetX + playerMapX * tileSize) playerX += tileSize / 10;
-    if (playerX > offsetX + playerMapX * tileSize) playerX -= tileSize / 10;
-    if (purpleBoxY < offsetY + purpleBoxMapY * tileSize) purpleBoxY += tileSize / 10;
-    if (purpleBoxY > offsetY + purpleBoxMapY * tileSize) purpleBoxY -= tileSize / 10;
-    if (playerMapY+1==purpleBoxMapY) purpleBoxX = playerX;
-    if (purpleBoxY<=playerY+tileSize+1) {
-        isPurpleBoxAttached = true;
-    } else {isPurpleBoxAttached=false;}
+    if (abs(purpleBoxX-(offsetX+purpleBoxMapX*tileSize)) <= tileSize/4) {purpleBoxX = offsetX+purpleBoxMapX*tileSize; inputAllowed=true;}
+    if (abs(purpleBoxY-(offsetY+purpleBoxMapY*tileSize)) <= tileSize/4) {purpleBoxY = offsetY+purpleBoxMapY*tileSize; inputAllowed=true;}
+    if (abs(playerX-(offsetX+playerMapX*tileSize)) <= tileSize/4) {playerX = offsetX+playerMapX*tileSize; inputAllowed=true;}
+    if (abs(playerY-(offsetY+playerMapX*tileSize)) <= tileSize/4) {playerY = offsetY+playerMapY*tileSize; inputAllowed=true;}
+    if (playerX < offsetX + playerMapX * tileSize) {playerX += tileSize / 4; inputAllowed=false;}
+    if (playerX > offsetX + playerMapX * tileSize) {playerX -= tileSize / 4; inputAllowed=false;}
+    if (purpleBoxY < offsetY + purpleBoxMapY * tileSize) {purpleBoxY += tileSize / 4; inputAllowed=false;}
+    if (purpleBoxY > offsetY + purpleBoxMapY * tileSize) {purpleBoxY -= tileSize / 4; inputAllowed=false;}
+    if (playerMapY+1==purpleBoxMapY) {purpleBoxMapX=playerMapX;purpleBoxX=playerX;}
+    isPurpleBoxAttached = (purpleBoxY<=playerY+tileSize+1);
+
+    if (purplePlaceholderMapX==purpleBoxMapX && purplePlaceholderMapY==purpleBoxMapY) level+=1;
 }
 
 void draw() {
     ClearBackground(ColorFromHSV(302, .54, .52));
-    const auto& tilemap = levelMap[to_string(level)]["tilemap"];
-    for (size_t rowIndex = 0; rowIndex < tilemap.size(); ++rowIndex) {
-        const auto& row = tilemap[rowIndex];
-        for (size_t tileIndex = 0; tileIndex < row.size(); ++tileIndex) {
-            const int tile = row[tileIndex].get<int>();
+    for (nlohmann::json::size_type rowIndex = 0; rowIndex < tileMap.size(); ++rowIndex) {
+        const auto& row = tileMap[rowIndex];
+        for (nlohmann::json::size_type tileIndex = 0; tileIndex < row.size(); ++tileIndex) {
+            const int tile = row[tileIndex];
             int x = offsetX + tileIndex * tileSize;
             int y = offsetY + rowIndex * tileSize;
         
@@ -209,7 +226,6 @@ void draw() {
     }
 
     DrawTexture(texturePlayer, playerX, playerY, WHITE);
-    if (isPurpleBoxAttached) DrawTexture(texturePlayer, 0,0 , WHITE);
     DrawTexture(texturePurplePlaceholder, purplePlaceholderX, purplePlaceholderY, WHITE);
     DrawTexture(texturePurpleBox, purpleBoxX, purpleBoxY, WHITE);
 }
