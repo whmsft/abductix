@@ -20,7 +20,7 @@ int frame = 0;
 int playerMapX, playerMapY, playerX, playerY;
 vector<vector<int>> purpleBox, purpleBoxMap;
 vector<vector<int>> purplePlaceholder, purplePlaceholderMap;
-bool isPurpleBoxAttached = false;
+int attachedPurpleBox = -1;
 bool inputAllowed=true;
 
 Image imageCornerTopLeft, imageCornerTopRight, imageCornerBottomLeft, imageCornerBottomRight, imageWallUp, imageWallDown, imageWallLeft, imageWallRight, imagePlayer, imagePurpleBox, imagePurplePlaceholder;
@@ -190,25 +190,26 @@ void update() {
     if (IsKeyPressed(KEY_RIGHT) && playerMapX+1<levelWidth) playerMapX++;
     if (IsKeyPressed(KEY_LEFT) && playerMapX>0) playerMapX--;
 
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !isPurpleBoxAttached && (playerMapX == purpleBoxMapX) && inputAllowed) {
-        purpleBoxMapY = playerMapY+1;
-    }
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && isPurpleBoxAttached && inputAllowed) {
-        purpleBoxMapY = newDropMapY(purpleBoxMapX, purpleBoxMapY);
-    }
-    
-    if (abs(purpleBoxX-(offsetX+purpleBoxMapX*tileSize)) <= tileSize/4) {purpleBoxX = offsetX+purpleBoxMapX*tileSize; inputAllowed=true;}
-    if (abs(purpleBoxY-(offsetY+purpleBoxMapY*tileSize)) <= tileSize/4) {purpleBoxY = offsetY+purpleBoxMapY*tileSize; inputAllowed=true;}
-    if (abs(playerX-(offsetX+playerMapX*tileSize)) <= tileSize/4) {playerX = offsetX+playerMapX*tileSize; inputAllowed=true;}
-    if (abs(playerY-(offsetY+playerMapX*tileSize)) <= tileSize/4) {playerY = offsetY+playerMapY*tileSize; inputAllowed=true;}
     if (playerX < offsetX + playerMapX * tileSize) {playerX += tileSize / 4; inputAllowed=false;}
     if (playerX > offsetX + playerMapX * tileSize) {playerX -= tileSize / 4; inputAllowed=false;}
-    if (purpleBoxY < offsetY + purpleBoxMapY * tileSize) {purpleBoxY += tileSize / 4; inputAllowed=false;}
-    if (purpleBoxY > offsetY + purpleBoxMapY * tileSize) {purpleBoxY -= tileSize / 4; inputAllowed=false;}
-    if (playerMapY+1==purpleBoxMapY) {purpleBoxMapX=playerMapX;purpleBoxX=playerX;}
-    isPurpleBoxAttached = (purpleBoxY<=playerY+tileSize+1);
-
-    if (purplePlaceholderMapX==purpleBoxMapX && purplePlaceholderMapY==purpleBoxMapY) {level+=1; InitLevel();}
+    if (abs(playerX-(offsetX+playerMapX*tileSize)) <= tileSize/4) {playerX = offsetX+playerMapX*tileSize; inputAllowed=true;}
+    if (abs(playerY-(offsetY+playerMapX*tileSize)) <= tileSize/4) {playerY = offsetY+playerMapY*tileSize; inputAllowed=true;}
+    attachedPurpleBox=-1;
+    for (int i = 0; i < purpleBoxMap.size(); ++i) {
+        if (purpleBox[i][1]<=playerY+tileSize+1) attachedPurpleBox = i;
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedPurpleBox[0]<0 && (playerMapX == purpleBoxMap[i][1]) && inputAllowed) {
+            purpleBoxMapY = playerMapY+1;
+        }
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedPurpleBox[0]>=0 && inputAllowed) {
+            purpleBoxMap = newDropMapY(purpleBoxMapX, purpleBoxMapY);
+        }
+        if (abs(purpleBox[i][0]-(offsetX+purpleBoxMap[i][X]*tileSize)) <= tileSize/4) {purpleBox[i][0] = offsetX+purpleBoxMap[i][0]*tileSize; inputAllowed=true;}
+        if (abs(purpleBox[i][1]-(offsetY+purpleBoxMap[i][Y]*tileSize)) <= tileSize/4) {purpleBox[i][1] = offsetY+purpleBoxMap[i][1]*tileSize; inputAllowed=true;}
+        if (purpleBoxY < offsetY + purpleBoxMapY * tileSize) {purpleBoxY += tileSize / 4; inputAllowed=false;}
+        if (purpleBoxY > offsetY + purpleBoxMapY * tileSize) {purpleBoxY -= tileSize / 4; inputAllowed=false;}
+        if (playerMapY+1==purpleBoxMap[i][1] && attachedPurpleBox==i) {purpleBoxMap[i][0]=playerMapX;purpleBox[i][0]=playerX;}
+    }
+    // if (purplePlaceholderMapX==purpleBoxMapX && purplePlaceholderMapY==purpleBoxMapY) {level+=1; InitLevel();}
 }
 
 void draw() {
