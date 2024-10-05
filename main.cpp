@@ -135,7 +135,7 @@ void InitLevel() {
     purpleBoxMap.resize(allLevelMap[to_string(level)]["purple"]["box"].size());
     purplePlaceholder.resize(allLevelMap[to_string(level)]["purple"]["holder"].size());
     purplePlaceholderMap.resize(allLevelMap[to_string(level)]["purple"]["holder"].size());
-    for (nlohmann::json::size_type i = 0; i < allLevelMap[to_string(level)]["purple"]["box"].size(); ++i) {
+    for (int i = 0; i < purpleBoxMap.size(); ++i) {
         purpleBoxMap[i].resize(2);
         purpleBoxMap[i][0] = allLevelMap[to_string(level)]["purple"]["box"][i][0].get<int>();
         purpleBoxMap[i][1] = allLevelMap[to_string(level)]["purple"]["box"][i][1].get<int>();
@@ -143,7 +143,7 @@ void InitLevel() {
         purpleBox[i][0] = offsetX + purpleBoxMap[i][0] * tileSize;
         purpleBox[i][1] = offsetY + purpleBoxMap[i][1] * tileSize;
     }
-    for (nlohmann::json::size_type i = 0; i < allLevelMap[to_string(level)]["purple"]["holder"].size(); ++i) {
+    for (int i = 0; i < purplePlaceholderMap.size(); ++i) {
         purplePlaceholderMap[i].resize(2);
         purplePlaceholderMap[i][0] = allLevelMap[to_string(level)]["purple"]["holder"][i][0].get<int>();
         purplePlaceholderMap[i][1] = allLevelMap[to_string(level)]["purple"]["holder"][i][1].get<int>();
@@ -235,7 +235,6 @@ void draw() {
     }
 
     DrawTexture(texturePlayer, playerX, playerY, WHITE);
-
-    DrawTexture(texturePurplePlaceholder, purplePlaceholderX, purplePlaceholderY, WHITE);
-    DrawTexture(texturePurpleBox, purpleBoxX, purpleBoxY, WHITE);
+    for (int i = 0; i < purpleHolderMap.size(); ++i) DrawTexture(texturePurplePlaceholder, purplePlaceholder[i][0], purplePlaceholder[i][1], WHITE);
+    for (int i = 0; i < purpleBoxMap.size(); ++i) DrawTexture(texturePurpleBox, purpleBox[i][1], purpleBox[i][1], WHITE);
 }
