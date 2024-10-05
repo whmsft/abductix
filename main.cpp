@@ -197,16 +197,16 @@ void update() {
     attachedPurpleBox=-1;
     for (int i = 0; i < purpleBoxMap.size(); ++i) {
         if (purpleBox[i][1]<=playerY+tileSize+1) attachedPurpleBox = i;
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedPurpleBox[0]<0 && (playerMapX == purpleBoxMap[i][1]) && inputAllowed) {
-            purpleBoxMapY = playerMapY+1;
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedPurpleBox<0 && (playerMapX == purpleBoxMap[i][1]) && inputAllowed) {
+            purpleBoxMap[i][1] = playerMapY+1;
         }
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedPurpleBox[0]>=0 && inputAllowed) {
-            purpleBoxMap = newDropMapY(purpleBoxMapX, purpleBoxMapY);
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedPurpleBox>=0 && inputAllowed) {
+            purpleBoxMap[i][1] = newDropMapY(purpleBoxMap[i][0], purpleBoxMap[i][1]);
         }
-        if (abs(purpleBox[i][0]-(offsetX+purpleBoxMap[i][X]*tileSize)) <= tileSize/4) {purpleBox[i][0] = offsetX+purpleBoxMap[i][0]*tileSize; inputAllowed=true;}
-        if (abs(purpleBox[i][1]-(offsetY+purpleBoxMap[i][Y]*tileSize)) <= tileSize/4) {purpleBox[i][1] = offsetY+purpleBoxMap[i][1]*tileSize; inputAllowed=true;}
-        if (purpleBoxY < offsetY + purpleBoxMapY * tileSize) {purpleBoxY += tileSize / 4; inputAllowed=false;}
-        if (purpleBoxY > offsetY + purpleBoxMapY * tileSize) {purpleBoxY -= tileSize / 4; inputAllowed=false;}
+        if (abs(purpleBox[i][0]-(offsetX+purpleBoxMap[i][0]*tileSize)) <= tileSize/4) {purpleBox[i][0] = offsetX+purpleBoxMap[i][0]*tileSize; inputAllowed=true;}
+        if (abs(purpleBox[i][1]-(offsetY+purpleBoxMap[i][1]*tileSize)) <= tileSize/4) {purpleBox[i][1] = offsetY+purpleBoxMap[i][1]*tileSize; inputAllowed=true;}
+        if (purpleBox[i][1] < offsetY + purpleBoxMap[i][1] * tileSize) {purpleBox[i][1] += tileSize / 4; inputAllowed=false;}
+        if (purpleBox[i][1] > offsetY + purpleBoxMap[i][1] * tileSize) {purpleBox[i][1] -= tileSize / 4; inputAllowed=false;}
         if (playerMapY+1==purpleBoxMap[i][1] && attachedPurpleBox==i) {purpleBoxMap[i][0]=playerMapX;purpleBox[i][0]=playerX;}
     }
     // if (purplePlaceholderMapX==purpleBoxMapX && purplePlaceholderMapY==purpleBoxMapY) {level+=1; InitLevel();}
@@ -236,6 +236,6 @@ void draw() {
     }
 
     DrawTexture(texturePlayer, playerX, playerY, WHITE);
-    for (int i = 0; i < purpleHolderMap.size(); ++i) DrawTexture(texturePurplePlaceholder, purplePlaceholder[i][0], purplePlaceholder[i][1], WHITE);
-    for (int i = 0; i < purpleBoxMap.size(); ++i) DrawTexture(texturePurpleBox, purpleBox[i][1], purpleBox[i][1], WHITE);
+    for (int i = 0; i < purplePlaceholder.size(); ++i) DrawTexture(texturePurplePlaceholder, purplePlaceholder[i][0], purplePlaceholder[i][1], WHITE);
+    for (int i = 0; i < purpleBox.size(); ++i) DrawTexture(texturePurpleBox, purpleBox[i][0], purpleBox[i][1], WHITE);
 }
