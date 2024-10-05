@@ -12,14 +12,14 @@ void gameLoop() { update(); BeginDrawing(); draw(); EndDrawing(); }
 
 char* allLevelMapFile = LoadFileText("levels.json");
 nlohmann::json allLevelMap = nlohmann::json::parse(allLevelMapFile);
-std::vector<std::vector<int>> tileMap;
+vector<vector<int>> tileMap;
 int level = 1;
 int screenWidth, screenHeight, offsetX, offsetY, tileSize;
 int levelWidth, levelHeight;
 int frame = 0;
 int playerMapX, playerMapY, playerX, playerY;
-int purpleBoxX, purpleBoxY, purpleBoxMapX, purpleBoxMapY;
-int purplePlaceholderX, purplePlaceholderY, purplePlaceholderMapX, purplePlaceholderMapY;
+vector<vector<int>> purpleBox, purpleBoxMap;
+vector<vector<int>> purplePlaceholder, purplePlaceholderMap;
 bool isPurpleBoxAttached = false;
 bool inputAllowed=true;
 
@@ -130,20 +130,29 @@ void InitLevel() {
 
     playerMapX = allLevelMap[to_string(level)]["playerX"].get<int>();
     playerMapY = allLevelMap[to_string(level)]["playerY"].get<int>();
+
+    purpleBox.resize(allLevelMap[to_string(level)]["purple"]["box"].size());
+    purpleBoxMap.resize(allLevelMap[to_string(level)]["purple"]["box"].size());
+    purplePlaceholder.resize(allLevelMap[to_string(level)]["purple"]["holder"].size());
+    purplePlaceholderMap.resize(allLevelMap[to_string(level)]["purple"]["holder"].size());
     for (nlohmann::json::size_type i = 0; i < allLevelMap[to_string(level)]["purple"]["box"].size(); ++i) {
-        purpleBoxMapX = allLevelMap[to_string(level)]["purple"]["box"][i][0].get<int>();
-        purpleBoxMapY = allLevelMap[to_string(level)]["purple"]["box"][i][1].get<int>();
+        purpleBoxMap[i].resize(2);
+        purpleBoxMap[i][0] = allLevelMap[to_string(level)]["purple"]["box"][i][0].get<int>();
+        purpleBoxMap[i][1] = allLevelMap[to_string(level)]["purple"]["box"][i][1].get<int>();
+        purpleBox[i].resize(2);
+        purpleBox[i][0] = offsetX + purpleBoxMap[i][0] * tileSize;
+        purpleBox[i][1] = offsetY + purpleBoxMap[i][1] * tileSize;
     }
     for (nlohmann::json::size_type i = 0; i < allLevelMap[to_string(level)]["purple"]["holder"].size(); ++i) {
-        purplePlaceholderMapX = allLevelMap[to_string(level)]["purple"]["holder"][i][0].get<int>();
-        purplePlaceholderMapY = allLevelMap[to_string(level)]["purple"]["holder"][i][1].get<int>();
+        purplePlaceholderMap[i].resize(2);
+        purplePlaceholderMap[i][0] = allLevelMap[to_string(level)]["purple"]["holder"][i][0].get<int>();
+        purplePlaceholderMap[i][1] = allLevelMap[to_string(level)]["purple"]["holder"][i][1].get<int>();
+        purplePlaceholder[i].resize(2);
+        purplePlaceholder[i][0] = offsetX + purplePlaceholderMap[i][0] * tileSize;
+        purplePlaceholder[i][1] = offsetY + purplePlaceholderMap[i][1] * tileSize;
     }
     playerX = offsetX + playerMapX * tileSize;
     playerY = offsetY + playerMapY * tileSize;
-    purpleBoxX = offsetX + purpleBoxMapX * tileSize;
-    purpleBoxY = offsetY + purpleBoxMapY * tileSize;
-    purplePlaceholderX = offsetX + purplePlaceholderMapX * tileSize;
-    purplePlaceholderY = offsetY + purplePlaceholderMapY * tileSize;
 }
 
 int main(void) {
@@ -199,7 +208,7 @@ void update() {
     if (playerMapY+1==purpleBoxMapY) {purpleBoxMapX=playerMapX;purpleBoxX=playerX;}
     isPurpleBoxAttached = (purpleBoxY<=playerY+tileSize+1);
 
-    if (purplePlaceholderMapX==purpleBoxMapX && purplePlaceholderMapY==purpleBoxMapY) level+=1;
+    if (purplePlaceholderMapX==purpleBoxMapX && purplePlaceholderMapY==purpleBoxMapY) {level+=1; InitLevel();}
 }
 
 void draw() {
@@ -226,6 +235,7 @@ void draw() {
     }
 
     DrawTexture(texturePlayer, playerX, playerY, WHITE);
+
     DrawTexture(texturePurplePlaceholder, purplePlaceholderX, purplePlaceholderY, WHITE);
     DrawTexture(texturePurpleBox, purpleBoxX, purpleBoxY, WHITE);
 }
