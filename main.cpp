@@ -13,7 +13,7 @@ void gameLoop() { update(); BeginDrawing(); draw(); EndDrawing(); }
 char* allLevelMapFile = LoadFileText("levels.json");
 nlohmann::json allLevelMap = nlohmann::json::parse(allLevelMapFile);
 vector<vector<int>> tileMap;
-int level = 1;
+int level = 2;
 int screenWidth, screenHeight, offsetX, offsetY, tileSize;
 int levelWidth, levelHeight;
 int frame = 0;
@@ -101,7 +101,7 @@ void ResizeAndRotateTextures(int newTileSize) {
 }
 
 int newDropMapY(int positionX, int positionY) {
-    for (int index=positionY; index<levelHeight; index++) {
+    for (int index=positionY+1; index<levelHeight; index++) {
         if (tileMap[index][positionX]!=0) {return index-1; break;}
     }
     return -1;
@@ -190,24 +190,32 @@ void update() {
     if (IsKeyPressed(KEY_RIGHT) && playerMapX+1<levelWidth && inputAllowed) playerMapX++;
     if (IsKeyPressed(KEY_LEFT) && playerMapX>0 && inputAllowed) playerMapX--;
 
+    if (abs(playerX-(offsetX+playerMapX*tileSize)) < tileSize/4) {playerX = offsetX+playerMapX*tileSize; inputAllowed=true;}
+    if (abs(playerY-(offsetY+playerMapX*tileSize)) < tileSize/4) {playerY = offsetY+playerMapY*tileSize; inputAllowed=true;}
     if (playerX < offsetX + playerMapX * tileSize) {playerX += tileSize / 4; inputAllowed=false;}
     if (playerX > offsetX + playerMapX * tileSize) {playerX -= tileSize / 4; inputAllowed=false;}
-    if (abs(playerX-(offsetX+playerMapX*tileSize)) <= tileSize/4) {playerX = offsetX+playerMapX*tileSize; inputAllowed=true;}
-    if (abs(playerY-(offsetY+playerMapX*tileSize)) <= tileSize/4) {playerY = offsetY+playerMapY*tileSize; inputAllowed=true;}
-    attachedPurpleBoxIndex=-1;
+    int indexToLift = -1;
     for (int i = 0; i < purpleBoxMap.size(); ++i) {
+        if (attachedPurpleBoxIndex!=i) tileMap[purpleBoxMap[i][1]][purpleBoxMap[i][0]] = 10+i;
         if (purpleBox[i][1]<=playerY+tileSize+1) attachedPurpleBoxIndex = i;
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedPurpleBoxIndex==-1 && (playerMapX == purpleBoxMap[i][0]) && inputAllowed) {
-            purpleBoxMap[i][1] = playerMapY+1;
+            if (indexToLift == -1) {indexToLift = i;} else if (purpleBoxMap[indexToLift][1]>purpleBoxMap[i][1]) {indexToLift=i;}
         }
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedPurpleBoxIndex!=-1 && inputAllowed) {
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedPurpleBoxIndex==i && inputAllowed) {
+            tileMap[purpleBoxMap[i][1]][purpleBoxMap[i][0]] = 0;
+            attachedPurpleBoxIndex=-1;
             purpleBoxMap[i][1] = newDropMapY(purpleBoxMap[i][0], purpleBoxMap[i][1]);
         }
+        
         if (abs(purpleBox[i][0]-(offsetX+purpleBoxMap[i][0]*tileSize)) <= tileSize/4) {purpleBox[i][0] = offsetX+purpleBoxMap[i][0]*tileSize; inputAllowed=true;}
         if (abs(purpleBox[i][1]-(offsetY+purpleBoxMap[i][1]*tileSize)) <= tileSize/4) {purpleBox[i][1] = offsetY+purpleBoxMap[i][1]*tileSize; inputAllowed=true;}
         if (purpleBox[i][1] < offsetY + purpleBoxMap[i][1] * tileSize) {purpleBox[i][1] += tileSize / 4; inputAllowed=false;}
         if (purpleBox[i][1] > offsetY + purpleBoxMap[i][1] * tileSize) {purpleBox[i][1] -= tileSize / 4; inputAllowed=false;}
         if (playerMapY+1==purpleBoxMap[i][1] && attachedPurpleBoxIndex==i) {purpleBoxMap[i][0]=playerMapX;purpleBox[i][0]=playerX;}
+    }
+    if (indexToLift!=-1) {
+        tileMap[purpleBoxMap[indexToLift][1]][purpleBoxMap[indexToLift][0]] = 0;
+        purpleBoxMap[indexToLift][1] = playerMapY+1;
     }
     // if (purplePlaceholderMapX==purpleBoxMapX && purplePlaceholderMapY==purpleBoxMapY) {level+=1; InitLevel();}
 }
@@ -237,6 +245,9 @@ void draw() {
 
     DrawTexture(texturePlayer, playerX, playerY, WHITE);
     for (int i = 0; i < purplePlaceholder.size(); ++i) DrawTexture(texturePurplePlaceholder, purplePlaceholder[i][0], purplePlaceholder[i][1], WHITE);
-    for (int i = 0; i < purpleBox.size(); ++i) DrawTexture(texturePurpleBox, purpleBox[i][0], purpleBox[i][1], WHITE);
-    DrawText(TextFormat("attachedPurpleBoxIndex: %i", attachedPurpleBoxIndex),10,10,20,WHITE);
+    for (int i = 0; i < purpleBox.size(); ++i) {
+        DrawTexture(texturePurpleBox, purpleBox[i][0], purpleBox[i][1], WHITE);
+        DrawText(TextFormat("%i",i), purpleBox[i][0], purpleBox[i][1], 20, WHITE);
+    }
+    ///DrawText(TextFormat("attachedPurpleBoxIndex: %i", attachedPurpleBoxIndex),10,10,20,WHITE);
 }
