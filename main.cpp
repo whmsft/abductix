@@ -10,10 +10,12 @@ using namespace std;
 void update(), draw();
 void gameLoop() { update(); BeginDrawing(); draw(); EndDrawing(); }
 
-char* allLevelMapFile = LoadFileText("levels.json");
-nlohmann::json allLevelMap = nlohmann::json::parse(allLevelMapFile);
+const char* allLevelMapFile = LoadFileText("levels.json");
+const nlohmann::json allLevelMap = nlohmann::json::parse(allLevelMapFile);
 vector<vector<int>> tileMap;
-int level = 2;
+int level = 0;
+int satisfiedPlaceholders = 0;
+const int maxLevel = 2;
 int screenWidth, screenHeight, offsetX, offsetY, tileSize;
 int levelWidth, levelHeight;
 int frame = 0;
@@ -23,58 +25,31 @@ vector<vector<int>> purplePlaceholder, purplePlaceholderMap;
 int attachedPurpleBoxIndex = -1;
 bool inputAllowed=true;
 
-Image imageCornerTopLeft, imageCornerTopRight, imageCornerBottomLeft, imageCornerBottomRight, imageWallUp, imageWallDown, imageWallLeft, imageWallRight, imagePlayer, imagePurpleBox, imagePurplePlaceholder;
+Image imageCornerTopLeft = LoadImage("assets/corner_topleft.png");
+Image imageCornerTopRight = LoadImage("assets/corner_topright.png");
+Image imageCornerBottomLeft = LoadImage("assets/corner_bottomleft.png");
+Image imageCornerBottomRight = LoadImage("assets/corner_bottomright.png");
+Image imageWallUp = LoadImage("assets/wall_up.png");
+Image imageWallDown = LoadImage("assets/wall_down.png");
+Image imageWallLeft = LoadImage("assets/wall_left.png");
+Image imageWallRight = LoadImage("assets/wall_right.png");
+Image imagePlayer = LoadImage("assets/player.png");
+Image imagePurpleBox = LoadImage("assets/purple_box.png");
+Image imagePurplePlaceholder = LoadImage("assets/purple_placeholder.png");
 Texture2D textureCornerTopLeft, textureCornerTopRight, textureCornerBottomLeft, textureCornerBottomRight, textureWallUp, textureWallDown, textureWallLeft, textureWallRight, texturePlayer, texturePurpleBox, texturePurplePlaceholder;
 
 void LoadTextures() {
-    imageCornerTopLeft = LoadImage("assets/corner.png");
-    imageCornerTopRight = LoadImage("assets/corner.png");
-    imageCornerBottomLeft = LoadImage("assets/corner.png");
-    imageCornerBottomRight = LoadImage("assets/corner.png");
-    imageWallUp = LoadImage("assets/wall.png");
-    imageWallDown = LoadImage("assets/wall.png");
-    imageWallLeft = LoadImage("assets/wall.png");
-    imageWallRight = LoadImage("assets/wall.png");
-    imagePlayer = LoadImage("assets/player.png");
-    imagePurpleBox = LoadImage("assets/purple.box.png");
-    imagePurplePlaceholder = LoadImage("assets/purple.placeholder.png");
-
-    textureCornerTopLeft = LoadTextureFromImage(imageCornerTopLeft);
-    textureCornerTopRight = LoadTextureFromImage(imageCornerTopRight);
-    textureCornerBottomLeft = LoadTextureFromImage(imageCornerBottomLeft);
-    textureCornerBottomRight = LoadTextureFromImage(imageCornerBottomRight);
-    textureWallUp = LoadTextureFromImage(imageWallUp);
-    textureWallDown = LoadTextureFromImage(imageWallDown);
-    textureWallLeft = LoadTextureFromImage(imageWallLeft);
-    textureWallRight = LoadTextureFromImage(imageWallRight);
-    texturePlayer = LoadTextureFromImage(imagePlayer);
-    texturePurpleBox = LoadTextureFromImage(imagePurpleBox);
-    texturePurplePlaceholder = LoadTextureFromImage(imagePurplePlaceholder);
-}
-
-void ResizeAndRotateTextures(int newTileSize) {
-    ImageResizeNN(&imageCornerTopLeft, newTileSize, newTileSize);
-    ImageResizeNN(&imageCornerTopRight, newTileSize, newTileSize);
-    ImageResizeNN(&imageCornerBottomLeft, newTileSize, newTileSize);
-    ImageResizeNN(&imageCornerBottomRight, newTileSize, newTileSize);
-    ImageResizeNN(&imageWallUp, newTileSize, newTileSize);
-    ImageResizeNN(&imageWallDown, newTileSize, newTileSize);
-    ImageResizeNN(&imageWallLeft, newTileSize, newTileSize);
-    ImageResizeNN(&imageWallRight, newTileSize, newTileSize);
-    ImageResizeNN(&imagePlayer, newTileSize, newTileSize);
-    ImageResizeNN(&imagePurpleBox, newTileSize, newTileSize);
-    ImageResizeNN(&imagePurplePlaceholder, newTileSize, newTileSize);
-
-    ImageRotateCW(&imageCornerTopRight);
-    ImageRotateCCW(&imageCornerBottomLeft);
-    ImageRotateCW(&imageCornerBottomRight);
-    ImageRotateCW(&imageCornerBottomRight);
-
-    ImageRotateCW(&imageWallDown);
-    ImageRotateCW(&imageWallDown);
-    ImageRotateCCW(&imageWallLeft);
-    ImageRotateCW(&imageWallRight);
-
+    ImageResizeNN(&imageCornerTopLeft, tileSize, tileSize);
+    ImageResizeNN(&imageCornerTopRight, tileSize, tileSize);
+    ImageResizeNN(&imageCornerBottomLeft, tileSize, tileSize);
+    ImageResizeNN(&imageCornerBottomRight, tileSize, tileSize);
+    ImageResizeNN(&imageWallUp, tileSize, tileSize);
+    ImageResizeNN(&imageWallDown, tileSize, tileSize);
+    ImageResizeNN(&imageWallLeft, tileSize, tileSize);
+    ImageResizeNN(&imageWallRight, tileSize, tileSize);
+    ImageResizeNN(&imagePlayer, tileSize, tileSize);
+    ImageResizeNN(&imagePurpleBox, tileSize, tileSize);
+    ImageResizeNN(&imagePurplePlaceholder, tileSize, tileSize);
     UnloadTexture(textureCornerTopLeft);
     UnloadTexture(textureCornerTopRight);
     UnloadTexture(textureCornerBottomLeft);
@@ -86,7 +61,6 @@ void ResizeAndRotateTextures(int newTileSize) {
     UnloadTexture(texturePlayer);
     UnloadTexture(texturePurpleBox);
     UnloadTexture(texturePurplePlaceholder);
-
     textureCornerTopLeft = LoadTextureFromImage(imageCornerTopLeft);
     textureCornerTopRight = LoadTextureFromImage(imageCornerTopRight);
     textureCornerBottomLeft = LoadTextureFromImage(imageCornerBottomLeft);
@@ -108,6 +82,8 @@ int newDropMapY(int positionX, int positionY) {
 }
 
 void InitLevel() {
+    if (level==maxLevel) level = 0;
+    level+=1;
     levelWidth = allLevelMap[to_string(level)]["width"].get<int>();
     levelHeight = allLevelMap[to_string(level)]["height"].get<int>();
     
@@ -126,11 +102,14 @@ void InitLevel() {
     offsetX = (screenWidth - (levelWidth * tileSize)) / 2;
     offsetY = (screenHeight - (levelHeight * tileSize)) / 2;
 
-    ResizeAndRotateTextures(tileSize);
+    LoadTextures();
 
     playerMapX = allLevelMap[to_string(level)]["playerX"].get<int>();
     playerMapY = allLevelMap[to_string(level)]["playerY"].get<int>();
-
+    purpleBox.clear();
+    purpleBoxMap.clear();
+    purplePlaceholder.clear();
+    purplePlaceholderMap.clear();
     purpleBox.resize(allLevelMap[to_string(level)]["purple"]["box"].size());
     purpleBoxMap.resize(allLevelMap[to_string(level)]["purple"]["box"].size());
     purplePlaceholder.resize(allLevelMap[to_string(level)]["purple"]["holder"].size());
@@ -164,7 +143,6 @@ int main(void) {
     #else
     InitWindow(320, 640, "abductix");
     SetTargetFPS(30);
-    LoadTextures();
     InitLevel();
     
     while (!WindowShouldClose()) gameLoop();
@@ -185,7 +163,7 @@ void update() {
     if (IsWindowResized()) {
         screenWidth = GetScreenWidth();
         screenHeight = GetScreenHeight();
-        InitLevel();
+        LoadTextures();
     }
     if (IsKeyPressed(KEY_RIGHT) && playerMapX+1<levelWidth && inputAllowed) playerMapX++;
     if (IsKeyPressed(KEY_LEFT) && playerMapX>0 && inputAllowed) playerMapX--;
@@ -194,6 +172,7 @@ void update() {
     if (abs(playerY-(offsetY+playerMapX*tileSize)) < tileSize/4) {playerY = offsetY+playerMapY*tileSize; inputAllowed=true;}
     if (playerX < offsetX + playerMapX * tileSize) {playerX += tileSize / 4; inputAllowed=false;}
     if (playerX > offsetX + playerMapX * tileSize) {playerX -= tileSize / 4; inputAllowed=false;}
+    satisfiedPlaceholders = 0;
     int indexToLift = -1;
     for (int i = 0; i < purpleBoxMap.size(); ++i) {
         if (attachedPurpleBoxIndex!=i) tileMap[purpleBoxMap[i][1]][purpleBoxMap[i][0]] = 10+i;
@@ -206,18 +185,20 @@ void update() {
             attachedPurpleBoxIndex=-1;
             purpleBoxMap[i][1] = newDropMapY(purpleBoxMap[i][0], purpleBoxMap[i][1]);
         }
-        
         if (abs(purpleBox[i][0]-(offsetX+purpleBoxMap[i][0]*tileSize)) <= tileSize/4) {purpleBox[i][0] = offsetX+purpleBoxMap[i][0]*tileSize; inputAllowed=true;}
         if (abs(purpleBox[i][1]-(offsetY+purpleBoxMap[i][1]*tileSize)) <= tileSize/4) {purpleBox[i][1] = offsetY+purpleBoxMap[i][1]*tileSize; inputAllowed=true;}
         if (purpleBox[i][1] < offsetY + purpleBoxMap[i][1] * tileSize) {purpleBox[i][1] += tileSize / 4; inputAllowed=false;}
         if (purpleBox[i][1] > offsetY + purpleBoxMap[i][1] * tileSize) {purpleBox[i][1] -= tileSize / 4; inputAllowed=false;}
         if (playerMapY+1==purpleBoxMap[i][1] && attachedPurpleBoxIndex==i) {purpleBoxMap[i][0]=playerMapX;purpleBox[i][0]=playerX;}
+        for (int j=0; j<purplePlaceholder.size(); ++j) {
+            if (purplePlaceholder[j][0] == purpleBox[i][0] && purplePlaceholder[j][1] == purpleBox[i][1]) ++satisfiedPlaceholders;
+        }
     }
     if (indexToLift!=-1) {
         tileMap[purpleBoxMap[indexToLift][1]][purpleBoxMap[indexToLift][0]] = 0;
         purpleBoxMap[indexToLift][1] = playerMapY+1;
     }
-    // if (purplePlaceholderMapX==purpleBoxMapX && purplePlaceholderMapY==purpleBoxMapY) {level+=1; InitLevel();}
+    if (satisfiedPlaceholders==purplePlaceholderMap.size()) InitLevel();
 }
 
 void draw() {
@@ -244,10 +225,12 @@ void draw() {
     }
 
     DrawTexture(texturePlayer, playerX, playerY, WHITE);
-    for (int i = 0; i < purplePlaceholder.size(); ++i) DrawTexture(texturePurplePlaceholder, purplePlaceholder[i][0], purplePlaceholder[i][1], WHITE);
+    for (int i = 0; i < purplePlaceholder.size(); ++i) {
+        DrawTexture(texturePurplePlaceholder, purplePlaceholder[i][0], purplePlaceholder[i][1], WHITE);
+        DrawText(TextFormat("satisfied: %i",satisfiedPlaceholders), 10, 10, 20, WHITE);
+    }
     for (int i = 0; i < purpleBox.size(); ++i) {
         DrawTexture(texturePurpleBox, purpleBox[i][0], purpleBox[i][1], WHITE);
-        DrawText(TextFormat("%i",i), purpleBox[i][0], purpleBox[i][1], 20, WHITE);
     }
-    ///DrawText(TextFormat("attachedPurpleBoxIndex: %i", attachedPurpleBoxIndex),10,10,20,WHITE);
+    // DrawText(TextFormat("attachedPurpleBoxIndex: %i", attachedPurpleBoxIndex),10,10,20,WHITE);
 }
