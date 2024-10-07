@@ -15,7 +15,7 @@ const nlohmann::json allLevelMap = nlohmann::json::parse(allLevelMapFile);
 vector<vector<int>> tileMap;
 int level = 0;
 int satisfiedPlaceholders = 0;
-const int maxLevel = 2;
+const int maxLevel = 3;
 int screenWidth, screenHeight, offsetX, offsetY, tileSize;
 int levelWidth, levelHeight;
 int frame = 0;
@@ -25,20 +25,32 @@ vector<vector<int>> purplePlaceholder, purplePlaceholderMap;
 int attachedPurpleBoxIndex = -1;
 bool inputAllowed=true;
 
-Image imageCornerTopLeft = LoadImage("assets/corner_topleft.png");
-Image imageCornerTopRight = LoadImage("assets/corner_topright.png");
-Image imageCornerBottomLeft = LoadImage("assets/corner_bottomleft.png");
-Image imageCornerBottomRight = LoadImage("assets/corner_bottomright.png");
-Image imageWallUp = LoadImage("assets/wall_up.png");
-Image imageWallDown = LoadImage("assets/wall_down.png");
-Image imageWallLeft = LoadImage("assets/wall_left.png");
-Image imageWallRight = LoadImage("assets/wall_right.png");
-Image imagePlayer = LoadImage("assets/player.png");
-Image imagePurpleBox = LoadImage("assets/purple_box.png");
-Image imagePurplePlaceholder = LoadImage("assets/purple_placeholder.png");
+Image imageCornerTopLeft, imageCornerTopRight, imageCornerBottomLeft, imageCornerBottomRight, imageWallUp, imageWallDown, imageWallLeft, imageWallRight, imagePlayer, imagePurpleBox, imagePurplePlaceholder;
 Texture2D textureCornerTopLeft, textureCornerTopRight, textureCornerBottomLeft, textureCornerBottomRight, textureWallUp, textureWallDown, textureWallLeft, textureWallRight, texturePlayer, texturePurpleBox, texturePurplePlaceholder;
 
 void LoadTextures() {
+    UnloadImage(imageCornerTopLeft);
+    UnloadImage(imageCornerTopRight);
+    UnloadImage(imageCornerBottomLeft);
+    UnloadImage(imageCornerBottomRight);
+    UnloadImage(imageWallUp);
+    UnloadImage(imageWallDown);
+    UnloadImage(imageWallLeft);
+    UnloadImage(imageWallRight);
+    UnloadImage(imagePlayer);
+    UnloadImage(imagePurpleBox);
+    UnloadImage(imagePurplePlaceholder);
+    imageCornerTopLeft = LoadImage("assets/corner_topleft.png");
+    imageCornerTopRight = LoadImage("assets/corner_topright.png");
+    imageCornerBottomLeft = LoadImage("assets/corner_bottomleft.png");
+    imageCornerBottomRight = LoadImage("assets/corner_bottomright.png");
+    imageWallUp = LoadImage("assets/wall_up.png");
+    imageWallDown = LoadImage("assets/wall_down.png");
+    imageWallLeft = LoadImage("assets/wall_left.png");
+    imageWallRight = LoadImage("assets/wall_right.png");
+    imagePlayer = LoadImage("assets/player.png");
+    imagePurpleBox = LoadImage("assets/purple_box.png");
+    imagePurplePlaceholder = LoadImage("assets/purple_placeholder.png");
     ImageResizeNN(&imageCornerTopLeft, tileSize, tileSize);
     ImageResizeNN(&imageCornerTopRight, tileSize, tileSize);
     ImageResizeNN(&imageCornerBottomLeft, tileSize, tileSize);
@@ -165,8 +177,9 @@ void update() {
         screenHeight = GetScreenHeight();
         LoadTextures();
     }
-    if (IsKeyPressed(KEY_RIGHT) && playerMapX+1<levelWidth && inputAllowed) playerMapX++;
-    if (IsKeyPressed(KEY_LEFT) && playerMapX>0 && inputAllowed) playerMapX--;
+    bool dragging = false;
+    if ((IsKeyPressed(KEY_RIGHT) || GetGestureDetected()==GESTURE_SWIPE_RIGHT) && playerMapX+1<levelWidth && inputAllowed) {playerMapX++;dragging=true;}
+    if ((IsKeyPressed(KEY_LEFT) || GetGestureDetected()==GESTURE_SWIPE_LEFT) && playerMapX>0 && inputAllowed) {playerMapX--;dragging=true;}
 
     if (abs(playerX-(offsetX+playerMapX*tileSize)) < tileSize/4) {playerX = offsetX+playerMapX*tileSize; inputAllowed=true;}
     if (abs(playerY-(offsetY+playerMapX*tileSize)) < tileSize/4) {playerY = offsetY+playerMapY*tileSize; inputAllowed=true;}
@@ -177,10 +190,10 @@ void update() {
     for (int i = 0; i < purpleBoxMap.size(); ++i) {
         if (attachedPurpleBoxIndex!=i) tileMap[purpleBoxMap[i][1]][purpleBoxMap[i][0]] = 10+i;
         if (purpleBox[i][1]<=playerY+tileSize+1) attachedPurpleBoxIndex = i;
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedPurpleBoxIndex==-1 && (playerMapX == purpleBoxMap[i][0]) && inputAllowed) {
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedPurpleBoxIndex==-1 && (playerMapX == purpleBoxMap[i][0]) && inputAllowed && !dragging) {
             if (indexToLift == -1) {indexToLift = i;} else if (purpleBoxMap[indexToLift][1]>purpleBoxMap[i][1]) {indexToLift=i;}
         }
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedPurpleBoxIndex==i && inputAllowed) {
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedPurpleBoxIndex==i && inputAllowed && !dragging) {
             tileMap[purpleBoxMap[i][1]][purpleBoxMap[i][0]] = 0;
             attachedPurpleBoxIndex=-1;
             purpleBoxMap[i][1] = newDropMapY(purpleBoxMap[i][0], purpleBoxMap[i][1]);
