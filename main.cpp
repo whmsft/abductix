@@ -20,13 +20,13 @@ int screenWidth, screenHeight, offsetX, offsetY, tileSize;
 int levelWidth, levelHeight;
 int frame = 0;
 int playerMapX, playerMapY, playerX, playerY;
-vector<vector<int>> purpleBox, purpleBoxMap;
-vector<vector<int>> purplePlaceholder, purplePlaceholderMap;
-int attachedPurpleBoxIndex = -1;
+vector<vector<int>> box, boxMap;
+vector<vector<int>> placeholder, placeholderMap;
+int attachedboxIndex = -1;
 bool inputAllowed=true;
 
-Image imageCornerTopLeft, imageCornerTopRight, imageCornerBottomLeft, imageCornerBottomRight, imageWallUp, imageWallDown, imageWallLeft, imageWallRight, imagePlayer, imagePurpleBox, imagePurplePlaceholder;
-Texture2D textureCornerTopLeft, textureCornerTopRight, textureCornerBottomLeft, textureCornerBottomRight, textureWallUp, textureWallDown, textureWallLeft, textureWallRight, texturePlayer, texturePurpleBox, texturePurplePlaceholder;
+Image imageCornerTopLeft, imageCornerTopRight, imageCornerBottomLeft, imageCornerBottomRight, imageWallUp, imageWallDown, imageWallLeft, imageWallRight, imagePlayer, imagebox, imageplaceholder;
+Texture2D textureCornerTopLeft, textureCornerTopRight, textureCornerBottomLeft, textureCornerBottomRight, textureWallUp, textureWallDown, textureWallLeft, textureWallRight, texturePlayer, texturebox, textureplaceholder;
 
 void LoadTextures() {
     UnloadImage(imageCornerTopLeft);
@@ -38,8 +38,8 @@ void LoadTextures() {
     UnloadImage(imageWallLeft);
     UnloadImage(imageWallRight);
     UnloadImage(imagePlayer);
-    UnloadImage(imagePurpleBox);
-    UnloadImage(imagePurplePlaceholder);
+    UnloadImage(imagebox);
+    UnloadImage(imageplaceholder);
     imageCornerTopLeft = LoadImage("assets/corner_topleft.png");
     imageCornerTopRight = LoadImage("assets/corner_topright.png");
     imageCornerBottomLeft = LoadImage("assets/corner_bottomleft.png");
@@ -49,8 +49,8 @@ void LoadTextures() {
     imageWallLeft = LoadImage("assets/wall_left.png");
     imageWallRight = LoadImage("assets/wall_right.png");
     imagePlayer = LoadImage("assets/player.png");
-    imagePurpleBox = LoadImage("assets/purple_box.png");
-    imagePurplePlaceholder = LoadImage("assets/purple_placeholder.png");
+    imagebox = LoadImage("assets/purple_box.png");
+    imageplaceholder = LoadImage("assets/purple_placeholder.png");
     ImageResizeNN(&imageCornerTopLeft, tileSize, tileSize);
     ImageResizeNN(&imageCornerTopRight, tileSize, tileSize);
     ImageResizeNN(&imageCornerBottomLeft, tileSize, tileSize);
@@ -60,8 +60,8 @@ void LoadTextures() {
     ImageResizeNN(&imageWallLeft, tileSize, tileSize);
     ImageResizeNN(&imageWallRight, tileSize, tileSize);
     ImageResizeNN(&imagePlayer, tileSize, tileSize);
-    ImageResizeNN(&imagePurpleBox, tileSize, tileSize);
-    ImageResizeNN(&imagePurplePlaceholder, tileSize, tileSize);
+    ImageResizeNN(&imagebox, tileSize, tileSize);
+    ImageResizeNN(&imageplaceholder, tileSize, tileSize);
     UnloadTexture(textureCornerTopLeft);
     UnloadTexture(textureCornerTopRight);
     UnloadTexture(textureCornerBottomLeft);
@@ -71,8 +71,8 @@ void LoadTextures() {
     UnloadTexture(textureWallLeft);
     UnloadTexture(textureWallRight);
     UnloadTexture(texturePlayer);
-    UnloadTexture(texturePurpleBox);
-    UnloadTexture(texturePurplePlaceholder);
+    UnloadTexture(texturebox);
+    UnloadTexture(textureplaceholder);
     textureCornerTopLeft = LoadTextureFromImage(imageCornerTopLeft);
     textureCornerTopRight = LoadTextureFromImage(imageCornerTopRight);
     textureCornerBottomLeft = LoadTextureFromImage(imageCornerBottomLeft);
@@ -82,8 +82,8 @@ void LoadTextures() {
     textureWallLeft = LoadTextureFromImage(imageWallLeft);
     textureWallRight = LoadTextureFromImage(imageWallRight);
     texturePlayer = LoadTextureFromImage(imagePlayer);
-    texturePurpleBox = LoadTextureFromImage(imagePurpleBox);
-    texturePurplePlaceholder = LoadTextureFromImage(imagePurplePlaceholder);
+    texturebox = LoadTextureFromImage(imagebox);
+    textureplaceholder = LoadTextureFromImage(imageplaceholder);
 }
 
 int newDropMapY(int positionX, int positionY) {
@@ -118,29 +118,29 @@ void InitLevel() {
 
     playerMapX = allLevelMap[to_string(level)]["playerX"].get<int>();
     playerMapY = allLevelMap[to_string(level)]["playerY"].get<int>();
-    purpleBox.clear();
-    purpleBoxMap.clear();
-    purplePlaceholder.clear();
-    purplePlaceholderMap.clear();
-    purpleBox.resize(allLevelMap[to_string(level)]["purple"]["box"].size());
-    purpleBoxMap.resize(allLevelMap[to_string(level)]["purple"]["box"].size());
-    purplePlaceholder.resize(allLevelMap[to_string(level)]["purple"]["holder"].size());
-    purplePlaceholderMap.resize(allLevelMap[to_string(level)]["purple"]["holder"].size());
-    for (int i = 0; i < purpleBoxMap.size(); ++i) {
-        purpleBoxMap[i].resize(2);
-        purpleBoxMap[i][0] = allLevelMap[to_string(level)]["purple"]["box"][i][0].get<int>();
-        purpleBoxMap[i][1] = allLevelMap[to_string(level)]["purple"]["box"][i][1].get<int>();
-        purpleBox[i].resize(2);
-        purpleBox[i][0] = offsetX + purpleBoxMap[i][0] * tileSize;
-        purpleBox[i][1] = offsetY + purpleBoxMap[i][1] * tileSize;
+    box.clear();
+    boxMap.clear();
+    placeholder.clear();
+    placeholderMap.clear();
+    box.resize(allLevelMap[to_string(level)]["box"].size());
+    boxMap.resize(allLevelMap[to_string(level)]["box"].size());
+    placeholder.resize(allLevelMap[to_string(level)]["holder"].size());
+    placeholderMap.resize(allLevelMap[to_string(level)]["holder"].size());
+    for (int i = 0; i < boxMap.size(); ++i) {
+        boxMap[i].resize(2);
+        boxMap[i][0] = allLevelMap[to_string(level)]["box"][i][0].get<int>();
+        boxMap[i][1] = allLevelMap[to_string(level)]["box"][i][1].get<int>();
+        box[i].resize(2);
+        box[i][0] = offsetX + boxMap[i][0] * tileSize;
+        box[i][1] = offsetY + boxMap[i][1] * tileSize;
     }
-    for (int i = 0; i < purplePlaceholderMap.size(); ++i) {
-        purplePlaceholderMap[i].resize(2);
-        purplePlaceholderMap[i][0] = allLevelMap[to_string(level)]["purple"]["holder"][i][0].get<int>();
-        purplePlaceholderMap[i][1] = allLevelMap[to_string(level)]["purple"]["holder"][i][1].get<int>();
-        purplePlaceholder[i].resize(2);
-        purplePlaceholder[i][0] = offsetX + purplePlaceholderMap[i][0] * tileSize;
-        purplePlaceholder[i][1] = offsetY + purplePlaceholderMap[i][1] * tileSize;
+    for (int i = 0; i < placeholderMap.size(); ++i) {
+        placeholderMap[i].resize(2);
+        placeholderMap[i][0] = allLevelMap[to_string(level)]["holder"][i][0].get<int>();
+        placeholderMap[i][1] = allLevelMap[to_string(level)]["holder"][i][1].get<int>();
+        placeholder[i].resize(2);
+        placeholder[i][0] = offsetX + placeholderMap[i][0] * tileSize;
+        placeholder[i][1] = offsetY + placeholderMap[i][1] * tileSize;
     }
     playerX = offsetX + playerMapX * tileSize;
     playerY = offsetY + playerMapY * tileSize;
@@ -165,7 +165,7 @@ int main(void) {
     UnloadTexture(textureWallUp); UnloadTexture(textureWallDown);
     UnloadTexture(textureWallLeft); UnloadTexture(textureWallRight);
     UnloadTexture(texturePlayer);
-    UnloadTexture(texturePurpleBox); UnloadTexture(texturePurplePlaceholder);
+    UnloadTexture(texturebox); UnloadTexture(textureplaceholder);
     CloseWindow();
 
     return 0;
@@ -187,31 +187,31 @@ void update() {
     if (playerX > offsetX + playerMapX * tileSize) {playerX -= tileSize / 4; inputAllowed=false;}
     satisfiedPlaceholders = 0;
     int indexToLift = -1;
-    for (int i = 0; i < purpleBoxMap.size(); ++i) {
-        if (attachedPurpleBoxIndex!=i) tileMap[purpleBoxMap[i][1]][purpleBoxMap[i][0]] = 10+i;
-        if (purpleBox[i][1]<=playerY+tileSize+1) attachedPurpleBoxIndex = i;
-        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedPurpleBoxIndex==-1 && (playerMapX == purpleBoxMap[i][0]) && inputAllowed && !dragging) {
-            if (indexToLift == -1) {indexToLift = i;} else if (purpleBoxMap[indexToLift][1]>purpleBoxMap[i][1]) {indexToLift=i;}
+    for (int i = 0; i < boxMap.size(); ++i) {
+        if (attachedboxIndex!=i) tileMap[boxMap[i][1]][boxMap[i][0]] = 10+i;
+        if (box[i][1]<=playerY+tileSize+1) attachedboxIndex = i;
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedboxIndex==-1 && (playerMapX == boxMap[i][0]) && inputAllowed && !dragging) {
+            if (indexToLift == -1) {indexToLift = i;} else if (boxMap[indexToLift][1]>boxMap[i][1]) {indexToLift=i;}
         }
-        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedPurpleBoxIndex==i && inputAllowed && !dragging) {
-            tileMap[purpleBoxMap[i][1]][purpleBoxMap[i][0]] = 0;
-            attachedPurpleBoxIndex=-1;
-            purpleBoxMap[i][1] = newDropMapY(purpleBoxMap[i][0], purpleBoxMap[i][1]);
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedboxIndex==i && inputAllowed && !dragging) {
+            tileMap[boxMap[i][1]][boxMap[i][0]] = 0;
+            attachedboxIndex=-1;
+            boxMap[i][1] = newDropMapY(boxMap[i][0], boxMap[i][1]);
         }
-        if (abs(purpleBox[i][0]-(offsetX+purpleBoxMap[i][0]*tileSize)) <= tileSize/4) {purpleBox[i][0] = offsetX+purpleBoxMap[i][0]*tileSize; inputAllowed=true;}
-        if (abs(purpleBox[i][1]-(offsetY+purpleBoxMap[i][1]*tileSize)) <= tileSize/4) {purpleBox[i][1] = offsetY+purpleBoxMap[i][1]*tileSize; inputAllowed=true;}
-        if (purpleBox[i][1] < offsetY + purpleBoxMap[i][1] * tileSize) {purpleBox[i][1] += tileSize / 4; inputAllowed=false;}
-        if (purpleBox[i][1] > offsetY + purpleBoxMap[i][1] * tileSize) {purpleBox[i][1] -= tileSize / 4; inputAllowed=false;}
-        if (playerMapY+1==purpleBoxMap[i][1] && attachedPurpleBoxIndex==i) {purpleBoxMap[i][0]=playerMapX;purpleBox[i][0]=playerX;}
-        for (int j=0; j<purplePlaceholder.size(); ++j) {
-            if (purplePlaceholder[j][0] == purpleBox[i][0] && purplePlaceholder[j][1] == purpleBox[i][1]) ++satisfiedPlaceholders;
+        if (abs(box[i][0]-(offsetX+boxMap[i][0]*tileSize)) <= tileSize/4) {box[i][0] = offsetX+boxMap[i][0]*tileSize; inputAllowed=true;}
+        if (abs(box[i][1]-(offsetY+boxMap[i][1]*tileSize)) <= tileSize/4) {box[i][1] = offsetY+boxMap[i][1]*tileSize; inputAllowed=true;}
+        if (box[i][1] < offsetY + boxMap[i][1] * tileSize) {box[i][1] += tileSize / 4; inputAllowed=false;}
+        if (box[i][1] > offsetY + boxMap[i][1] * tileSize) {box[i][1] -= tileSize / 4; inputAllowed=false;}
+        if (playerMapY+1==boxMap[i][1] && attachedboxIndex==i) {boxMap[i][0]=playerMapX;box[i][0]=playerX;}
+        for (int j=0; j<placeholder.size(); ++j) {
+            if (placeholder[j][0] == box[i][0] && placeholder[j][1] == box[i][1]) ++satisfiedPlaceholders;
         }
     }
     if (indexToLift!=-1) {
-        tileMap[purpleBoxMap[indexToLift][1]][purpleBoxMap[indexToLift][0]] = 0;
-        purpleBoxMap[indexToLift][1] = playerMapY+1;
+        tileMap[boxMap[indexToLift][1]][boxMap[indexToLift][0]] = 0;
+        boxMap[indexToLift][1] = playerMapY+1;
     }
-    if (satisfiedPlaceholders==purplePlaceholderMap.size()) InitLevel();
+    if (satisfiedPlaceholders==placeholderMap.size()) InitLevel();
 }
 
 void draw() {
@@ -238,12 +238,12 @@ void draw() {
     }
 
     DrawTexture(texturePlayer, playerX, playerY, WHITE);
-    for (int i = 0; i < purplePlaceholder.size(); ++i) {
-        DrawTexture(texturePurplePlaceholder, purplePlaceholder[i][0], purplePlaceholder[i][1], WHITE);
+    for (int i = 0; i < placeholder.size(); ++i) {
+        DrawTexture(textureplaceholder, placeholder[i][0], placeholder[i][1], WHITE);
         DrawText(TextFormat("satisfied: %i",satisfiedPlaceholders), 10, 10, 20, WHITE);
     }
-    for (int i = 0; i < purpleBox.size(); ++i) {
-        DrawTexture(texturePurpleBox, purpleBox[i][0], purpleBox[i][1], WHITE);
+    for (int i = 0; i < box.size(); ++i) {
+        DrawTexture(texturebox, box[i][0], box[i][1], WHITE);
     }
-    // DrawText(TextFormat("attachedPurpleBoxIndex: %i", attachedPurpleBoxIndex),10,10,20,WHITE);
+    // DrawText(TextFormat("attachedboxIndex: %i", attachedboxIndex),10,10,20,WHITE);
 }
