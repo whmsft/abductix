@@ -190,10 +190,10 @@ void update() {
     for (int i = 0; i < purpleBoxMap.size(); ++i) {
         if (attachedPurpleBoxIndex!=i) tileMap[purpleBoxMap[i][1]][purpleBoxMap[i][0]] = 10+i;
         if (purpleBox[i][1]<=playerY+tileSize+1) attachedPurpleBoxIndex = i;
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedPurpleBoxIndex==-1 && (playerMapX == purpleBoxMap[i][0]) && inputAllowed && !dragging) {
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedPurpleBoxIndex==-1 && (playerMapX == purpleBoxMap[i][0]) && inputAllowed && !dragging) {
             if (indexToLift == -1) {indexToLift = i;} else if (purpleBoxMap[indexToLift][1]>purpleBoxMap[i][1]) {indexToLift=i;}
         }
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedPurpleBoxIndex==i && inputAllowed && !dragging) {
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedPurpleBoxIndex==i && inputAllowed && !dragging) {
             tileMap[purpleBoxMap[i][1]][purpleBoxMap[i][0]] = 0;
             attachedPurpleBoxIndex=-1;
             purpleBoxMap[i][1] = newDropMapY(purpleBoxMap[i][0], purpleBoxMap[i][1]);
