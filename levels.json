@@ -4,8 +4,8 @@
     "height": 8,
     "playerX": 0,
     "playerY": 2,
-    "box": [[0,5,"purple"]],
-    "holder": [[3,5,"purple"]],
+    "box": [[0,5,0]],
+    "holder": [[3,5,0]],
     "tilemap": [
       [0, 0, 0, 0],
       [0, 0, 0, 0],
@@ -22,8 +22,8 @@
     "height": 8,
     "playerX": 0,
     "playerY": 2,
-    "box": [[0,5,"purple"],[1,5,"purple"]],
-    "holder": [[2,5,"purple"],[3,5,"purple"]],
+    "box": [[0,5,0],[1,5,0]],
+    "holder": [[2,5,0],[3,5,0]],
     "tilemap": [
       [0, 0, 0, 0],
       [0, 0, 0, 0],
@@ -40,8 +40,8 @@
     "height": 8,
     "playerX": 0,
     "playerY": 2,
-    "box": [[1,5,"purple"],[3,5,"green"]],
-    "holder": [[2,5,"purple"],[4,5,"green"]],
+    "box": [[1,5,0],[3,5,1]],
+    "holder": [[2,5,0],[4,5,1]],
     "tilemap": [
       [0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0],
