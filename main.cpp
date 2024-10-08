@@ -25,8 +25,8 @@ vector<vector<int>> placeholder, placeholderMap;
 int attachedboxIndex = -1;
 bool inputAllowed=true;
 
-Image imageCornerTopLeft, imageCornerTopRight, imageCornerBottomLeft, imageCornerBottomRight, imageWallUp, imageWallDown, imageWallLeft, imageWallRight, imagePlayer, imagePurpleBox, imagePurplePlaceholder;
-Texture2D textureCornerTopLeft, textureCornerTopRight, textureCornerBottomLeft, textureCornerBottomRight, textureWallUp, textureWallDown, textureWallLeft, textureWallRight, texturePlayer, texturePurpleBox, texturePurplePlaceholder;
+Image imageCornerTopLeft, imageCornerTopRight, imageCornerBottomLeft, imageCornerBottomRight, imageWallUp, imageWallDown, imageWallLeft, imageWallRight, imagePlayer, imagePurpleBox, imagePurplePlaceholder, imageGreenBox, imageGreenPlaceholder;
+Texture2D textureCornerTopLeft, textureCornerTopRight, textureCornerBottomLeft, textureCornerBottomRight, textureWallUp, textureWallDown, textureWallLeft, textureWallRight, texturePlayer, texturePurpleBox, texturePurplePlaceholder, textureGreenBox, textureGreenPlaceholder;
 
 void LoadTextures() {
     UnloadImage(imageCornerTopLeft);
@@ -40,6 +40,8 @@ void LoadTextures() {
     UnloadImage(imagePlayer);
     UnloadImage(imagePurpleBox);
     UnloadImage(imagePurplePlaceholder);
+    UnloadImage(imageGreenBox);
+    UnloadImage(imageGreenPlaceholder);
     imageCornerTopLeft = LoadImage("assets/corner_topleft.png");
     imageCornerTopRight = LoadImage("assets/corner_topright.png");
     imageCornerBottomLeft = LoadImage("assets/corner_bottomleft.png");
@@ -51,6 +53,8 @@ void LoadTextures() {
     imagePlayer = LoadImage("assets/player.png");
     imagePurpleBox = LoadImage("assets/purple_box.png");
     imagePurplePlaceholder = LoadImage("assets/purple_placeholder.png");
+    imageGreenBox = LoadImage("assets/purple_box.png");
+    imageGreenPlaceholder = LoadImage("assets/purple_placeholder.png");
     ImageResizeNN(&imageCornerTopLeft, tileSize, tileSize);
     ImageResizeNN(&imageCornerTopRight, tileSize, tileSize);
     ImageResizeNN(&imageCornerBottomLeft, tileSize, tileSize);
@@ -62,6 +66,8 @@ void LoadTextures() {
     ImageResizeNN(&imagePlayer, tileSize, tileSize);
     ImageResizeNN(&imagePurpleBox, tileSize, tileSize);
     ImageResizeNN(&imagePurplePlaceholder, tileSize, tileSize);
+    ImageResizeNN(&imageGreenBox, tileSize, tileSize);
+    ImageResizeNN(&imageGreenPlaceholder, tileSize, tileSize);
     UnloadTexture(textureCornerTopLeft);
     UnloadTexture(textureCornerTopRight);
     UnloadTexture(textureCornerBottomLeft);
@@ -73,6 +79,8 @@ void LoadTextures() {
     UnloadTexture(texturePlayer);
     UnloadTexture(texturePurpleBox);
     UnloadTexture(texturePurplePlaceholder);
+    UnloadTexture(textureGreenBox);
+    UnloadTexture(textureGreenPlaceholder);
     textureCornerTopLeft = LoadTextureFromImage(imageCornerTopLeft);
     textureCornerTopRight = LoadTextureFromImage(imageCornerTopRight);
     textureCornerBottomLeft = LoadTextureFromImage(imageCornerBottomLeft);
@@ -84,6 +92,8 @@ void LoadTextures() {
     texturePlayer = LoadTextureFromImage(imagePlayer);
     texturePurpleBox = LoadTextureFromImage(imagePurpleBox);
     texturePurplePlaceholder = LoadTextureFromImage(imagePurplePlaceholder);
+    textureGreenBox = LoadTextureFromImage(imageGreenBox);
+    textureGreenPlaceholder = LoadTextureFromImage(imageGreenPlaceholder);
 }
 
 int newDropMapY(int positionX, int positionY) {
@@ -168,6 +178,7 @@ int main(void) {
     UnloadTexture(textureWallLeft); UnloadTexture(textureWallRight);
     UnloadTexture(texturePlayer);
     UnloadTexture(texturePurpleBox); UnloadTexture(texturePurplePlaceholder);
+    UnloadTexture(textureGreenBox); UnloadTexture(textureGreenPlaceholder);
     CloseWindow();
 
     return 0;
@@ -242,11 +253,11 @@ void draw() {
     DrawTexture(texturePlayer, playerX, playerY, WHITE);
     for (int i = 0; i < placeholderMap.size(); ++i) {
         if (placeholderMap[i][2]==0) {DrawTexture(texturePurplePlaceholder, placeholder[i][0], placeholder[i][1], WHITE);}
-        else if (placeholderMap[i][2]==1) {DrawTexture(texturePurplePlaceholder, placeholder[i][0], placeholder[i][1], WHITE);}
+        else if (placeholderMap[i][2]==1) {DrawTexture(textureGreenPlaceholder, placeholder[i][0], placeholder[i][1], WHITE);}
     }
     for (int i = 0; i < boxMap.size(); ++i) {
         if (boxMap[i][2]==0) {DrawTexture(texturePurpleBox, box[i][0], box[i][1], WHITE);}
-        else if (boxMap[i][2]==1) {DrawTexture(texturePurpleBox, box[i][0], box[i][1], WHITE);}
+        else if (boxMap[i][2]==1) {DrawTexture(textureGreenBox, box[i][0], box[i][1], WHITE);}
     }
     // DrawText(TextFormat("attachedboxIndex: %i", attachedboxIndex),10,10,20,WHITE);
 }
