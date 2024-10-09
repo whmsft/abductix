@@ -15,21 +15,3 @@ jobs:
 
     - name: Build
       run: g++ main.cpp -Wall -lraylib -lopengl32 -lgdi32 -lwinmm -Os -s -I"./include" -L"./lib" -o abductix_win_x64.exe
-    
-    - uses: dev-drprasad/delete-tag-and-release@v0.2.1
-      name: Delete latest alpha tag and release
-      with:
-        tag_name: alpha
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - uses: ncipollo/release-action@v1.12.0
-      name: Create new tag and release and upload artifacts
-      with:
-        name: "Automated build (${{ github.sha }})"
-        commit: main
-        tag: alpha
-        prerelease: true
-        artifacts: "abductix_win_x64.exe"
-        body: "This is an automated build for commit [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})"
-        token: ${{ secrets.GITHUB_TOKEN }}
