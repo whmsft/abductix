@@ -15,7 +15,7 @@ const nlohmann::json allLevelMap = nlohmann::json::parse(allLevelMapFile);
 vector<vector<int>> tileMap;
 int level = 0;
 int satisfiedPlaceholders = 0;
-const int maxLevel = 3;
+const int maxLevel = 5;
 int screenWidth, screenHeight, offsetX, offsetY, tileSize;
 int levelWidth, levelHeight;
 int frame = 0;
