@@ -22,7 +22,7 @@ int frame = 0;
 int playerMapX, playerMapY, playerX, playerY;
 vector<vector<int>> box, boxMap;
 vector<vector<int>> placeholder, placeholderMap;
-int attachedboxIndex = -1;
+int attachedBoxIndex = -1;
 bool inputAllowed = true;
 bool nextLevel = false;
 
@@ -217,30 +217,31 @@ void update() {
     if ((IsKeyPressed(KEY_RIGHT) || GetGestureDetected()==GESTURE_SWIPE_RIGHT) && playerMapX+1<levelWidth && inputAllowed) {playerMapX++;dragging=true;}
     if ((IsKeyPressed(KEY_LEFT) || GetGestureDetected()==GESTURE_SWIPE_LEFT) && playerMapX>0 && inputAllowed) {playerMapX--;dragging=true;}
 
-    if (abs(playerX-(offsetX+playerMapX*tileSize)) < tileSize/4) {playerX = offsetX+playerMapX*tileSize; inputAllowed=true;}
-    if (abs(playerY-(offsetY+playerMapX*tileSize)) < tileSize/4) {playerY = offsetY+playerMapY*tileSize; inputAllowed=true;}
-    if (playerX < offsetX + playerMapX * tileSize) {playerX += tileSize / 4; inputAllowed=false;}
-    if (playerX > offsetX + playerMapX * tileSize) {playerX -= tileSize / 4; inputAllowed=false;}
+    if (abs(playerX-(offsetX+playerMapX*tileSize)) < tileSize/4) playerX = offsetX+playerMapX*tileSize;
+    if (abs(playerY-(offsetY+playerMapX*tileSize)) < tileSize/4) playerY = offsetY+playerMapY*tileSize;
+    if (playerX < offsetX + playerMapX * tileSize) playerX += tileSize / 4;
+    if (playerX > offsetX + playerMapX * tileSize) playerX -= tileSize / 4;
     satisfiedPlaceholders = 0;
     int indexToLift = -1;
+    if (attachedBoxIndex!=-1) inputAllowed=(box[attachedBoxIndex][1] == offsetY + boxMap[attachedBoxIndex][1] * tileSize && playerX == offsetX + playerMapX * tileSize);
     for (int i = 0; i < boxMap.size(); ++i) {
-        if (attachedboxIndex!=i) tileMap[boxMap[i][1]][boxMap[i][0]] = 10+i;
-        if (box[i][1]<=playerY+tileSize+1) attachedboxIndex = i;
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedboxIndex==-1 && (playerMapX == boxMap[i][0]) && inputAllowed && !dragging) {
+        if (attachedBoxIndex!=i) tileMap[boxMap[i][1]][boxMap[i][0]] = 10+i;
+        if (box[i][1]<=playerY+tileSize+1) attachedBoxIndex = i;
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedBoxIndex==-1 && (playerMapX == boxMap[i][0]) && inputAllowed && !dragging) {
             if (indexToLift == -1 or box[indexToLift][1]>box[i][1]) {
                 indexToLift=i;
             }
         }
-        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedboxIndex==i && inputAllowed && !dragging) {
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedBoxIndex==i && inputAllowed && !dragging) {
             tileMap[boxMap[i][1]][boxMap[i][0]] = 0;
-            attachedboxIndex=-1;
+            attachedBoxIndex=-1;
             boxMap[i][1] = newDropMapY(boxMap[i][0], boxMap[i][1]);
         }
-        if (abs(box[i][0]-(offsetX+boxMap[i][0]*tileSize)) <= tileSize/4) {box[i][0] = offsetX+boxMap[i][0]*tileSize; inputAllowed=true;}
+        if (abs(box[i][0]-(offsetX+boxMap[i][0]*tileSize)) <= tileSize/4) {box[i][0] = offsetX+boxMap[i][0]*tileSize; }
         if (abs(box[i][1]-(offsetY+boxMap[i][1]*tileSize)) <= tileSize/4) {box[i][1] = offsetY+boxMap[i][1]*tileSize; inputAllowed=true;}
-        if (box[i][1] < offsetY + boxMap[i][1] * tileSize) {box[i][1] += tileSize / 4; inputAllowed=false;}
-        if (box[i][1] > offsetY + boxMap[i][1] * tileSize) {box[i][1] -= tileSize / 4; inputAllowed=false;}
-        if (playerMapY+1==boxMap[i][1] && attachedboxIndex==i) {boxMap[i][0]=playerMapX;box[i][0]=playerX;}
+        if (box[i][1] < offsetY + boxMap[i][1] * tileSize) box[i][1] += tileSize / 4;
+        if (box[i][1] > offsetY + boxMap[i][1] * tileSize) box[i][1] -= tileSize / 4;
+        if (playerMapY+1==boxMap[i][1] && attachedBoxIndex==i) {boxMap[i][0]=playerMapX;box[i][0]=playerX;}
         for (int j=0; j<placeholder.size(); ++j) {
             if (placeholder[j][0] == box[i][0] && placeholder[j][1] == box[i][1] && placeholderMap[j][2]==boxMap[i][2]) ++satisfiedPlaceholders;
         }
