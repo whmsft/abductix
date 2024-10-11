@@ -226,7 +226,7 @@ void update() {
     for (int i = 0; i < boxMap.size(); ++i) {
         if (attachedboxIndex!=i) tileMap[boxMap[i][1]][boxMap[i][0]] = 10+i;
         if (box[i][1]<=playerY+tileSize+1) attachedboxIndex = i;
-        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedboxIndex==-1 && (playerMapX == boxMap[i][0]) && inputAllowed && !dragging) {
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedboxIndex==-1 && (playerMapX == boxMap[i][0]) && inputAllowed && !dragging) {
             if (indexToLift == -1 or box[indexToLift][1]>box[i][1]) {
                 indexToLift=i;
             }
@@ -291,7 +291,6 @@ void draw() {
             case 2: DrawTexture(textureBlueBox, box[i][0], box[i][1], WHITE); break;
             case 3: DrawTexture(textureRedBox, box[i][0], box[i][1], WHITE); break;
         }
-        DrawText(TextFormat("%i", i),box[i][0],box[i][1],20,WHITE);
+        // DrawText(TextFormat("%i", i),box[i][0],box[i][1],20,WHITE);
     }
-    // 
 }
