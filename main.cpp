@@ -23,7 +23,6 @@ int playerMapX, playerMapY, playerX, playerY;
 vector<vector<int>> box, boxMap;
 vector<vector<int>> placeholder, placeholderMap;
 int attachedBoxIndex = -1;
-bool inputAllowed = true;
 bool nextLevel = false;
 
 Image imageCornerTopLeft, imageCornerTopRight, imageCornerBottomLeft, imageCornerBottomRight, imageWallUp, imageWallDown, imageWallLeft, imageWallRight, imagePlayer, imagePurpleBox, imagePurplePlaceholder, imageGreenBox, imageGreenPlaceholder, imageBlueBox, imageBluePlaceholder, imageRedBox, imageRedPlaceholder;
@@ -214,31 +213,28 @@ void update() {
         LoadTextures();
     }
     bool dragging = false;
-    if ((IsKeyPressed(KEY_RIGHT) || GetGestureDetected()==GESTURE_SWIPE_RIGHT) && playerMapX+1<levelWidth && inputAllowed) {playerMapX++;dragging=true;}
-    if ((IsKeyPressed(KEY_LEFT) || GetGestureDetected()==GESTURE_SWIPE_LEFT) && playerMapX>0 && inputAllowed) {playerMapX--;dragging=true;}
+    if ((IsKeyPressed(KEY_RIGHT) || GetGestureDetected()==GESTURE_SWIPE_RIGHT) && playerMapX+1<levelWidth) {playerMapX++;dragging=true;}
+    if ((IsKeyPressed(KEY_LEFT) || GetGestureDetected()==GESTURE_SWIPE_LEFT) && playerMapX>0) {playerMapX--;dragging=true;}
 
     if (abs(playerX-(offsetX+playerMapX*tileSize)) < tileSize/4) playerX = offsetX+playerMapX*tileSize;
     if (abs(playerY-(offsetY+playerMapX*tileSize)) < tileSize/4) playerY = offsetY+playerMapY*tileSize;
     if (playerX < offsetX + playerMapX * tileSize) playerX += tileSize / 4;
     if (playerX > offsetX + playerMapX * tileSize) playerX -= tileSize / 4;
     satisfiedPlaceholders = 0;
-    int indexToLift = -1;
-    if (attachedBoxIndex!=-1) inputAllowed=(box[attachedBoxIndex][1] == offsetY + boxMap[attachedBoxIndex][1] * tileSize && playerX == offsetX + playerMapX * tileSize);
+    int indexToLift = -1;    
     for (int i = 0; i < boxMap.size(); ++i) {
         if (attachedBoxIndex!=i) tileMap[boxMap[i][1]][boxMap[i][0]] = 10+i;
         if (box[i][1]<=playerY+tileSize+1) attachedBoxIndex = i;
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && attachedBoxIndex==-1 && (playerMapX == boxMap[i][0]) && inputAllowed && !dragging) {
-            if (indexToLift == -1 or box[indexToLift][1]>box[i][1]) {
-                indexToLift=i;
-            }
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedBoxIndex==-1 && (playerMapX == boxMap[i][0]) && !dragging) {
+            if (indexToLift == -1 or box[indexToLift][1]>box[i][1]) indexToLift=i;
         }
-        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedBoxIndex==i && inputAllowed && !dragging) {
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedBoxIndex==i && !dragging && indexToLift!=i) {
             tileMap[boxMap[i][1]][boxMap[i][0]] = 0;
             attachedBoxIndex=-1;
             boxMap[i][1] = newDropMapY(boxMap[i][0], boxMap[i][1]);
         }
-        if (abs(box[i][0]-(offsetX+boxMap[i][0]*tileSize)) <= tileSize/4) {box[i][0] = offsetX+boxMap[i][0]*tileSize; }
-        if (abs(box[i][1]-(offsetY+boxMap[i][1]*tileSize)) <= tileSize/4) {box[i][1] = offsetY+boxMap[i][1]*tileSize; inputAllowed=true;}
+        if (abs(box[i][0]-(offsetX+boxMap[i][0]*tileSize)) <= tileSize/4) box[i][0] = offsetX+boxMap[i][0]*tileSize;
+        if (abs(box[i][1]-(offsetY+boxMap[i][1]*tileSize)) <= tileSize/4) box[i][1] = offsetY+boxMap[i][1]*tileSize;
         if (box[i][1] < offsetY + boxMap[i][1] * tileSize) box[i][1] += tileSize / 4;
         if (box[i][1] > offsetY + boxMap[i][1] * tileSize) box[i][1] -= tileSize / 4;
         if (playerMapY+1==boxMap[i][1] && attachedBoxIndex==i) {boxMap[i][0]=playerMapX;box[i][0]=playerX;}
@@ -292,6 +288,5 @@ void draw() {
             case 2: DrawTexture(textureBlueBox, box[i][0], box[i][1], WHITE); break;
             case 3: DrawTexture(textureRedBox, box[i][0], box[i][1], WHITE); break;
         }
-        // DrawText(TextFormat("%i", i),box[i][0],box[i][1],20,WHITE);
     }
 }
