@@ -13,9 +13,9 @@ void gameLoop() { update(); BeginDrawing(); draw(); EndDrawing(); }
 const char* allLevelMapFile = LoadFileText("levels.json");
 const nlohmann::json allLevelMap = nlohmann::json::parse(allLevelMapFile);
 vector<vector<int>> tileMap;
-int level = 0;
+int level = 4;
 int satisfiedPlaceholders = 0;
-const int maxLevel = 5;
+const int maxLevel = 10;
 int screenWidth, screenHeight, offsetX, offsetY, tileSize;
 int levelWidth, levelHeight;
 int frame = 0;
