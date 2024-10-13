@@ -13,7 +13,7 @@ void gameLoop() { update(); BeginDrawing(); draw(); EndDrawing(); }
 const char* allLevelMapFile = LoadFileText("levels.json");
 const nlohmann::json allLevelMap = nlohmann::json::parse(allLevelMapFile);
 vector<vector<int>> tileMap;
-int level = 4;
+int level = 0;
 int satisfiedPlaceholders = 0;
 const int maxLevel = 10;
 int screenWidth, screenHeight, offsetX, offsetY, tileSize;
@@ -207,6 +207,7 @@ int main(void) {
 
 void update() {
     if (nextLevel) {InitLevel(); nextLevel=false;}
+    bool inputCheck = true;
     if (IsWindowResized()) {
         screenWidth = GetScreenWidth();
         screenHeight = GetScreenHeight();
@@ -225,13 +226,14 @@ void update() {
     for (int i = 0; i < boxMap.size(); ++i) {
         if (attachedBoxIndex!=i) tileMap[boxMap[i][1]][boxMap[i][0]] = 10+i;
         if (box[i][1]<=playerY+tileSize+1) attachedBoxIndex = i;
-        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedBoxIndex==-1 && (playerMapX == boxMap[i][0]) && !dragging) {
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedBoxIndex==-1 && (playerMapX == boxMap[i][0]) && !dragging && inputCheck) {
             if (indexToLift == -1 or box[indexToLift][1]>box[i][1]) indexToLift=i;
         }
-        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedBoxIndex==i && !dragging && indexToLift!=i) {
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && attachedBoxIndex==i && !dragging && indexToLift!=i && inputCheck && newDropMapY(boxMap[i][0], boxMap[i][1])!=-1) {
             tileMap[boxMap[i][1]][boxMap[i][0]] = 0;
             attachedBoxIndex=-1;
             boxMap[i][1] = newDropMapY(boxMap[i][0], boxMap[i][1]);
+            inputCheck = false;
         }
         if (abs(box[i][0]-(offsetX+boxMap[i][0]*tileSize)) <= tileSize/4) box[i][0] = offsetX+boxMap[i][0]*tileSize;
         if (abs(box[i][1]-(offsetY+boxMap[i][1]*tileSize)) <= tileSize/4) box[i][1] = offsetY+boxMap[i][1]*tileSize;
