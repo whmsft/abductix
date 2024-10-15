@@ -141,7 +141,11 @@ void InitLevel() {
     screenWidth = GetScreenWidth();
     screenHeight = GetScreenHeight();
 
-    tileSize = screenWidth / (levelWidth + 2);
+    if (screenHeight>screenWidth) {
+        tileSize = screenWidth / (levelWidth + 2);
+    } else {
+        tileSize = screenHeight / (levelHeight + 2);
+    }
     offsetX = (screenWidth - (levelWidth * tileSize)) / 2;
     offsetY = (screenHeight - (levelHeight * tileSize)) / 2;
 
@@ -186,7 +190,8 @@ int main(void) {
     InitWindow(320, 640, "abductix");
     emscripten_set_main_loop(gameLoop, 30, 1);
     #else
-    InitWindow(320, 640, "abductix");
+    InitWindow(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()), "outsideIn");
+    ToggleFullscreen();
     SetTargetFPS(30);
     InitLevel();
     
@@ -208,11 +213,6 @@ int main(void) {
 void update() {
     if (nextLevel) {InitLevel(); nextLevel=false;}
     bool inputCheck = true;
-    if (IsWindowResized()) {
-        screenWidth = GetScreenWidth();
-        screenHeight = GetScreenHeight();
-        LoadTextures();
-    }
     bool dragging = false;
     if ((IsKeyPressed(KEY_RIGHT) || GetGestureDetected()==GESTURE_SWIPE_RIGHT) && playerMapX+1<levelWidth) {playerMapX++;dragging=true;}
     if ((IsKeyPressed(KEY_LEFT) || GetGestureDetected()==GESTURE_SWIPE_LEFT) && playerMapX>0) {playerMapX--;dragging=true;}
