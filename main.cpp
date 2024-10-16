@@ -240,11 +240,14 @@ void update() {
             boxMap[i][1] = newDropMapY(boxMap[i][0], boxMap[i][1]);
             inputCheck = false;
         }
-        if (abs(box[i][0]-(offsetX+boxMap[i][0]*tileSize)) <= tileSize/4) box[i][0] = offsetX+boxMap[i][0]*tileSize;
         if (abs(box[i][1]-(offsetY+boxMap[i][1]*tileSize)) <= tileSize/4) box[i][1] = offsetY+boxMap[i][1]*tileSize;
         if (box[i][1] < offsetY + boxMap[i][1] * tileSize) box[i][1] += tileSize / 4;
         if (box[i][1] > offsetY + boxMap[i][1] * tileSize) box[i][1] -= tileSize / 4;
-        if (attachedBoxIndex==i) box[i][1] = playerY+tileSize;
+        if (attachedBoxIndex==i) {box[i][1] = playerY+tileSize;} else {
+            if (box[i][0] < offsetX + boxMap[i][0] * tileSize) box[i][0] += tileSize / 4;
+            if (box[i][0] > offsetX + boxMap[i][0] * tileSize) box[i][0] -= tileSize / 4;
+            if (abs(box[i][0]-(offsetX+boxMap[i][0]*tileSize)) <= tileSize/4) box[i][0] = offsetX+boxMap[i][0]*tileSize;
+        }
         if (playerMapY+1==boxMap[i][1]) {boxMap[i][0]=playerMapX;box[i][0]=playerX;}
         for (int j=0; j<placeholder.size(); ++j) {
             if (placeholder[j][0] == box[i][0] && placeholder[j][1] == box[i][1] && placeholderMap[j][2]==boxMap[i][2]) ++satisfiedPlaceholders;
