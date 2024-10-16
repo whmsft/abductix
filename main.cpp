@@ -18,7 +18,7 @@ int satisfiedPlaceholders = 0;
 const int maxLevel = 10;
 int screenWidth, screenHeight, offsetX, offsetY, tileSize;
 int levelWidth, levelHeight;
-int frame = 0;
+int FRAME = 0;
 int playerMapX, playerMapY, playerX, playerY;
 vector<vector<int>> box, boxMap;
 vector<vector<int>> placeholder, placeholderMap;
@@ -211,6 +211,7 @@ int main(void) {
 }
 
 void update() {
+    FRAME+=1;
     if (nextLevel) {InitLevel(); nextLevel=false;}
     bool inputCheck = true;
     bool dragging = false;
@@ -239,7 +240,8 @@ void update() {
         if (abs(box[i][1]-(offsetY+boxMap[i][1]*tileSize)) <= tileSize/4) box[i][1] = offsetY+boxMap[i][1]*tileSize;
         if (box[i][1] < offsetY + boxMap[i][1] * tileSize) box[i][1] += tileSize / 4;
         if (box[i][1] > offsetY + boxMap[i][1] * tileSize) box[i][1] -= tileSize / 4;
-        if (playerMapY+1==boxMap[i][1] && attachedBoxIndex==i) {boxMap[i][0]=playerMapX;box[i][0]=playerX;}
+        if (attachedBoxIndex==i) box[i][1] = playerY+tileSize;
+        if (playerMapY+1==boxMap[i][1]) {boxMap[i][0]=playerMapX;box[i][0]=playerX;}
         for (int j=0; j<placeholder.size(); ++j) {
             if (placeholder[j][0] == box[i][0] && placeholder[j][1] == box[i][1] && placeholderMap[j][2]==boxMap[i][2]) ++satisfiedPlaceholders;
         }
