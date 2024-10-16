@@ -1,4 +1,5 @@
 #include <string>
+#include <cmath>
 #include "include/raylib.h"
 #include "include/nlohmann/json.hpp"
 using namespace std;
@@ -210,8 +211,12 @@ int main(void) {
     return 0;
 }
 
+bool playerGoingDown = true;
 void update() {
     FRAME+=1;
+    playerY += (playerGoingDown) ? +tileSize/60:-tileSize/60;
+    if (playerY>=offsetY+playerMapY*tileSize+tileSize/12) playerGoingDown=false;
+    if (playerY<=offsetY+playerMapY*tileSize-tileSize/12) playerGoingDown=true;
     if (nextLevel) {InitLevel(); nextLevel=false;}
     bool inputCheck = true;
     bool dragging = false;
@@ -219,7 +224,6 @@ void update() {
     if ((IsKeyPressed(KEY_LEFT) || GetGestureDetected()==GESTURE_SWIPE_LEFT) && playerMapX>0) {playerMapX--;dragging=true;}
 
     if (abs(playerX-(offsetX+playerMapX*tileSize)) < tileSize/4) playerX = offsetX+playerMapX*tileSize;
-    if (abs(playerY-(offsetY+playerMapX*tileSize)) < tileSize/4) playerY = offsetY+playerMapY*tileSize;
     if (playerX < offsetX + playerMapX * tileSize) playerX += tileSize / 4;
     if (playerX > offsetX + playerMapX * tileSize) playerX -= tileSize / 4;
     satisfiedPlaceholders = 0;
